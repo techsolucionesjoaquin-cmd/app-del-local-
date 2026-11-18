@@ -1,0 +1,1571 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Primera entrega de arquitectura, modelo de datos y API REST para KRONOS TECH.">
+<title>KRONOS TECH · Dossier de arquitectura</title>
+<style>
+:root{--ink:#142740;--body:#304660;--muted:#4d6480;--line:#d8e3ef;--blue:#1d5290;--teal:#056a60;--teal-pale:#eaf8f4;--canvas:#f2f6fb;--white:#fff;--navy:#0d2037;--navy-soft:#15314e;--radius:16px;--max:1400px;--mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;color-scheme:light}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--canvas);color:var(--body);font:1rem/1.66 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+::selection{background:#c9e9ee;color:#0b2e50}
+a{color:var(--blue);text-underline-offset:.18em;text-decoration-thickness:.08em}
+a:hover{color:var(--teal)}
+a:focus-visible,[tabindex]:focus-visible{outline:3px solid #027c71;outline-offset:4px;border-radius:4px}
+.skip{position:absolute;left:12px;top:12px;z-index:3;padding:12px 16px;background:#fff;transform:translateY(-180%)}.skip:focus{transform:none}
+.shell{width:min(var(--max),calc(100% - 72px));margin-inline:auto}
+.mast{background:#0a192c;color:#d5e3f2;border-bottom:1px solid #29405b}
+.mast-inner{display:flex;align-items:center;justify-content:space-between;min-height:62px;gap:16px}
+.mast .brand{display:flex;gap:12px;align-items:center;color:#f8fbff;text-decoration:none;font-weight:720;letter-spacing:.085em;font-size:.83rem}
+.brand-mark{display:grid;place-items:center;width:30px;height:30px;background:#90e2d3;border-radius:7px;color:#0e3548}
+.mast-meta{display:flex;gap:24px;align-items:center;font-size:.76rem}.mast-meta a{color:#c6e1f8}.mast-meta span{font-family:var(--mono);letter-spacing:.1em}
+.hero{background:radial-gradient(ellipse at 88% 28%,#193e5f 0%,transparent 56%),linear-gradient(129deg,#0f233b,#0d2037 68%);color:#eaf4fe;padding:58px 0 60px;position:relative;isolation:isolate}
+.hero::before{position:absolute;inset:0;content:"";z-index:-1;opacity:.52;background:repeating-linear-gradient(90deg,transparent,transparent 47px,#79b2dc18 48px,#79b2dc18 49px),repeating-linear-gradient(0deg,transparent,transparent 47px,#79b2dc15 48px,#79b2dc15 49px)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,340px);gap:clamp(24px,5vw,82px);align-items:center}
+.eyebrow,.chapter-kicker,.nav-label,.summary-label{font-weight:760;font-family:var(--mono);font-size:.73rem;letter-spacing:.12em;text-transform:uppercase}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;color:#a0ebde;margin:0 0 14px}
+.eyebrow::before,.status-dot{content:"";display:inline-block;width:7px;height:7px;background:#83d7c8;border-radius:50%;flex:none}
+.hero h1{margin:0;color:#f8fbff;font-size:clamp(2.65rem,6.5vw,5.4rem);line-height:1.02;font-weight:790;letter-spacing:-.064em}
+.hero h1 span{color:#8de5d6}
+.hero-lede{max-width:59ch;color:#dce8f6;line-height:1.58;font-size:clamp(1.02rem,1.6vw,1.23rem);margin:20px 0 24px}
+.hero-links{display:flex;gap:12px;flex-wrap:wrap}.hero-links a{padding:8px 13px;border-radius:7px;border:1px solid #7292b2;color:#eaf3fd;text-decoration:none;font-weight:650;font-size:.86rem}.hero-links a:first-child{background:#9ce7da;border-color:#9ce7da;color:#0e303e}.hero-links a:hover{background:#def8f1;color:#113444}.hero-links a:focus-visible,.mast a:focus-visible{outline-color:#a1e6dc}
+.stack{border:1px solid #708da8;border-radius:14px;background:#102840;box-shadow:0 20px 35px #060f223b;overflow:hidden}
+.stack-head{padding:12px 17px;letter-spacing:.10em;font:.72rem/1.4 var(--mono);background:#173954;color:#bcd5ea;display:flex;gap:10px;align-items:center}
+.stack ol{list-style:none;margin:0;padding:4px 17px 7px}.stack li{display:flex;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid #3b5470}.stack li:last-child{border:0}.stack-no{display:grid;place-items:center;width:30px;height:30px;border:1px solid #486782;border-radius:6px;color:#a5eadf;font:.73rem/1 var(--mono);flex:none}.stack strong{font-size:.94rem;display:block;color:#f1f6fc;line-height:1.35}.stack small{display:block;color:#b6cce1;font-size:.76rem;line-height:1.3;margin-top:4px}
+.layout{display:grid;grid-template-columns:223px minmax(0,1fr);gap:30px;align-items:start;padding-block:34px 52px}
+.toc{position:sticky;top:22px;padding:16px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--white);box-shadow:0 8px 24px #17314e08}
+.nav-label{color:var(--muted);padding:3px 9px 9px;margin:0}
+.toc ol{list-style:none;padding:0;margin:0}.toc li{margin:2px 0}
+.toc a{display:flex;gap:9px;align-items:baseline;line-height:1.35;text-decoration:none;color:var(--ink);font-size:.87rem;font-weight:640;padding:9px 8px;border-radius:8px}.toc a:hover,.toc a:focus-visible{background:var(--teal-pale);color:var(--teal)}.toc a .nav-num{color:var(--teal);font:.73rem/1 var(--mono);flex:none}
+.toc-end{margin:12px 8px 2px;border-top:1px solid var(--line);padding-top:12px;font-size:.76rem;color:var(--muted);line-height:1.42}
+main{min-width:0}
+.summary,.chapter{border:1px solid var(--line);border-radius:var(--radius);background:var(--white);box-shadow:0 8px 22px #17314e06}
+.summary{padding:24px 26px;margin-bottom:22px}.summary-label{margin:0;color:var(--teal)}.summary>h2{margin:3px 0 15px;font-size:clamp(1.25rem,3vw,1.7rem);line-height:1.3;color:var(--ink);letter-spacing:-.024em}
+.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.summary-item{border:1px solid var(--line);border-radius:10px;padding:14px 13px;background:#f8fbff}.summary-item b{display:block;color:var(--ink);font-size:.92rem;line-height:1.35;margin:0 0 4px}.summary-item p{font-size:.84rem;line-height:1.48;margin:0}
+.notice{margin:14px 0 0;padding:10px 12px;background:#fff9ed;border-left:3px solid #bc8f53;color:#63471f;line-height:1.47;font-size:.87rem}.notice strong{color:#573a0e}
+.chapter{margin-bottom:23px;padding:clamp(19px,3.2vw,34px);scroll-margin-top:20px}.chapter:target{border-color:#82b5b0}.chapter-head{display:flex;gap:16px;align-items:flex-start}.unit{display:grid;place-items:center;width:48px;height:48px;flex:none;border-radius:11px;background:var(--teal-pale);border:1px solid #bbdfd8;color:var(--teal);font:700 1rem/1 var(--mono)}.chapter-kicker{color:var(--teal);line-height:1.35}.chapter h2{font-size:clamp(1.62rem,3.5vw,2.45rem);line-height:1.13;letter-spacing:-.043em;color:var(--ink);margin:4px 0 7px}.chapter-head p{margin:0;color:var(--muted);font-size:.92rem;line-height:1.48}
+.subindex{display:flex;gap:7px;flex-wrap:wrap;padding:18px 0;border-bottom:1px solid var(--line);margin-bottom:18px}.subindex a{display:inline-block;line-height:1.3;padding:6px 9px;border:1px solid #d8e4ef;background:#f3f8ff;font-size:.76rem;font-weight:630;border-radius:6px;text-decoration:none}.subindex a:hover{background:var(--teal-pale);border-color:#b2dbd4}
+.prose{line-height:1.62;font-size:.96rem}.prose p{margin:0 0 .92em}.prose strong{color:var(--ink)}.prose li{margin:.34em 0}.prose ul,.prose ol{margin:.45em 0 1.2em;padding-left:1.55em}.prose h3,.prose h4{scroll-margin-top:22px;color:var(--ink);line-height:1.28}.prose h3{font-size:1.36rem;letter-spacing:-.022em;margin:1.55em 0 .65em}.prose h3:first-child{margin-top:0}.prose h4{font-size:1.06rem;margin:1.4em 0 .6em}.prose h3:target,.prose h4:target{color:var(--teal)}
+.prose code{font:.87em/1.36 var(--mono);color:#204f7e;background:#edf4fc;padding:.08em .27em;border-radius:4px;overflow-wrap:anywhere}.prose pre{background:#102740;color:#eaf4fe;border-radius:10px;padding:14px 16px;overflow-x:auto;margin:14px 0 20px;line-height:1.45}.prose pre code{color:inherit;background:none;padding:0;font-size:.81rem;overflow-wrap:normal}
+.table-wrap{margin:14px 0 20px;border:1px solid var(--line);border-radius:9px;overflow:auto;max-width:100%}.table-wrap table{width:100%;min-width:620px;border-collapse:collapse;font-size:.85rem;text-align:left;line-height:1.45;color:var(--body)}.table-wrap thead{background:#e9f1fb;color:var(--ink)}.table-wrap th,.table-wrap td{padding:10px 11px;vertical-align:top;border-bottom:1px solid #e0e9f3}.table-wrap th{font-weight:760}.table-wrap tr:last-child td{border-bottom:0}.table-wrap tbody tr:nth-child(even){background:#f7faff}.table-wrap td:first-child{min-width:154px;font-weight:645;color:var(--ink)}.table-wrap td code{line-height:1.55}
+.diagram{margin:14px 0 20px}.diagram-scroll{max-width:100%;overflow:auto;border-radius:13px}.diagram-scroll img{display:block;width:100%;min-width:680px;height:auto}.diagram figcaption{color:var(--muted);font-size:.80rem;line-height:1.5;margin:8px 2px 0}
+.to-top{display:inline-block;margin-top:9px;color:var(--blue);font-size:.84rem;font-weight:680;text-decoration:none}.to-top:hover{text-decoration:underline}
+.site-footer{border-top:1px solid var(--line);padding:19px 0 27px;color:var(--muted);font-size:.82rem}.site-footer .shell{display:flex;justify-content:space-between;gap:14px;align-items:baseline;flex-wrap:wrap}.site-footer strong{color:var(--ink);letter-spacing:.045em}
+@media(max-width:1060px){.shell{width:calc(100% - 46px)}.layout{grid-template-columns:188px minmax(0,1fr);gap:18px}.toc{padding-inline:8px}.toc a{font-size:.81rem}.summary{padding-inline:20px}.hero-grid{grid-template-columns:minmax(0,1fr) minmax(230px,300px)}}
+@media(max-width:800px){.layout{grid-template-columns:1fr;gap:16px;padding-block:20px 33px}.toc{position:static;padding:11px 10px}.toc ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 6px}.toc-end{display:none}.hero{padding:43px 0 40px}.stack-head{padding-inline:13px}.stack ol{padding-inline:13px}}
+@media(max-width:560px){.shell{width:calc(100% - 30px)}.mast-inner{min-height:55px}.mast-meta span{display:none}.hero-grid{grid-template-columns:1fr;gap:22px}.hero-lede{margin:15px 0 17px}.stack li{padding:8px 0}.stack ol{padding-top:1px;padding-bottom:2px}.summary-grid,.toc ol{grid-template-columns:repeat(2,minmax(0,1fr))}.summary-grid .summary-item:last-child{grid-column:1/-1}.summary{padding:17px}.chapter{padding:17px}.chapter-head{gap:10px}.unit{width:36px;height:36px;font-size:.87rem}.subindex{padding-block:13px;margin-bottom:14px}.prose h3{font-size:1.19rem}.diagram figcaption::after{content:" Deslizá el gráfico si necesitás ver el resto."}}
+@media(max-width:375px){.summary-grid{grid-template-columns:1fr}.summary-grid .summary-item:last-child{grid-column:auto}.mast-meta a{font-size:.71rem}.hero h1{font-size:2.47rem}}
+@media print{body{background:#fff;color:#17243a;font-size:10pt}.shell{width:auto}.mast,.hero-links,.toc,.to-top,.skip,.subindex,.site-footer{display:none}.hero{background:#fff;padding:0 0 12pt;color:#101f38}.hero::before,.stack{display:none}.hero-grid{display:block}.hero h1,.hero h1 span,.hero-lede,.eyebrow{color:#101f38}.hero h1{font-size:34pt}.layout{display:block;padding:0}.summary,.chapter{padding:8pt 0;border:0;box-shadow:none;margin:0 0 10pt}.chapter{break-before:page}.chapter h2,.chapter h3,.chapter h4{break-after:avoid}.prose{font-size:9pt}.table-wrap,.diagram-scroll,.prose pre{overflow:visible;max-width:100%}.table-wrap table{width:100%;min-width:0;font-size:8pt}.table-wrap tr,.diagram,.summary-item{break-inside:avoid}.table-wrap thead{display:table-header-group}.table-wrap td:first-child{min-width:0}.diagram-scroll img{min-width:0}.prose pre{white-space:pre-wrap;background:#f2f6fa;color:#102740}.prose pre code{font-size:8pt}}
+</style>
+</head>
+<body>
+<a href="#dossier" class="skip">Ir al contenido principal</a>
+<header class="mast" id="inicio"><div class="shell mast-inner">
+<a href="#dossier" class="brand"><span class="brand-mark" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 20 20" fill="none"><path d="M4 4v12m12-12-7 6 7 6" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>KRONOS TECH</a>
+<div class="mast-meta"><span>DOCUMENTO V1.0</span><a href="#plan">Plan de desarrollo</a></div>
+</div></header>
+<section class="hero" aria-labelledby="title"><div class="shell hero-grid">
+<div><p class="eyebrow">Primera entrega · Diseño previo a implementación</p>
+<h1 id="title">KRONOS <span>TECH</span></h1>
+<p class="hero-lede">Arquitectura para una operación integrada de servicio técnico, armados, inventario, ventas, pagos y caja.</p>
+<div class="hero-links"><a href="#arquitectura">Leer arquitectura ↓</a><a href="#arquitectura--7-decisiones-por-confirmar">Decisiones por confirmar</a></div></div>
+<div class="stack"><div class="stack-head"><span class="status-dot" aria-hidden="true"></span>TECNOLOGÍAS Y FRONTERAS</div><ol>
+<li><span class="stack-no" aria-hidden="true">01</span><div><strong>Frontend independiente</strong><small>HTML5 · CSS3 · JavaScript ES</small></div></li>
+<li><span class="stack-no" aria-hidden="true">02</span><div><strong>API REST del mismo origen</strong><small>PHP 8.2+ · JSON · PDO</small></div></li>
+<li><span class="stack-no" aria-hidden="true">03</span><div><strong>Base de datos relacional</strong><small>MySQL 8 · InnoDB · transacciones</small></div></li>
+</ol></div></div></section>
+<div class="shell layout">
+<nav class="toc" aria-label="Índice del dossier"><p class="nav-label">Índice del dossier</p><ol><li><a href="#arquitectura"><span class="nav-num">01</span>Arquitectura del sistema</a></li><li><a href="#datos"><span class="nav-num">02</span>Modelo de datos</a></li><li><a href="#reglas"><span class="nav-num">03</span>Reglas de negocio</a></li><li><a href="#api"><span class="nav-num">04</span>API REST</a></li><li><a href="#plan"><span class="nav-num">05</span>Plan de desarrollo y pruebas</a></li><li><a href="#instalacion"><span class="nav-num">06</span>Instalación prevista</a></li></ol><p class="toc-end">Documento autocontenido.<br>Los capítulos funcionan sin conexión.</p></nav>
+<main id="dossier" tabindex="-1">
+<section class="summary" aria-labelledby="summary-title"><p class="summary-label">Lectura rápida</p><h2 id="summary-title">Tres reglas que mantienen los datos consistentes</h2>
+<div class="summary-grid">
+<div class="summary-item"><b>01 · Reservar no es descontar</b><p>El stock físico baja al consumir o vender. La reserva afecta solo lo disponible.</p></div>
+<div class="summary-item"><b>02 · Un anticipo, una imputación</b><p>El cobro reduce el saldo de la misma orden. Ni aprobar el presupuesto ni cobrar el resto crea otra venta.</p></div>
+<div class="summary-item"><b>03 · El efectivo no es la venta</b><p>El turno suma el efectivo aplicado, excluye el cambio y muestra débito y transferencia por separado.</p></div>
+</div><p class="notice"><strong>Estado de la entrega:</strong> arquitectura documentada. No se implementó la aplicación ni se ejecutaron sus pruebas. La revisión visual queda pendiente de recibir Figma.</p></section>
+<article class="chapter" id="arquitectura" aria-labelledby="arquitectura-title">
+<div class="chapter-head"><span class="unit" aria-hidden="true">01</span><div><div class="chapter-kicker">CAPÍTULO 01 / 06</div><h2 id="arquitectura-title">Arquitectura del sistema</h2><p>Alcance, capas, pantallas, permisos y decisiones de diseño.</p></div></div>
+<nav class="subindex" aria-label="En este capítulo"><a href="#arquitectura--1-resumen-y-alcance">Resumen y alcance</a><a href="#arquitectura--2-diagrama-de-arquitectura">Diagrama de arquitectura</a><a href="#arquitectura--3-estructura-objetivo-del-repositorio">Estructura objetivo del repositorio</a><a href="#arquitectura--4-experiencia-de-uso-y-figma">Experiencia de uso y Figma</a><a href="#arquitectura--5-matriz-de-roles-y-permisos">Matriz de roles y permisos</a><a href="#arquitectura--6-seguridad-y-operacion">Seguridad y operación</a><a href="#arquitectura--7-decisiones-por-confirmar">Decisiones por confirmar</a></nav>
+<div class="prose">
+<h3 id="arquitectura--1-resumen-y-alcance">1. Resumen y alcance</h3>
+<p><strong>KRONOS TECH</strong> es una aplicación interna para una tienda de informática que recibe equipos, realiza reparaciones y armados, vende productos y servicios, y administra caja. La recepción abre una orden; el taller registra diagnóstico y consumos; atención consulta presupuestos y saldos; caja cobra sobre la misma cuenta. No se vuelve a vender una reparación para poder cobrarla.</p>
+<div aria-label="Tabla: 1. Resumen y alcance" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Alcance de la V1</th>
+<th scope="col">Límite explícito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Acceso y roles, clientes y equipos, órdenes con borrador, recepción, evidencia y entrega, agenda y tablero operativo</td>
+<td>Una empresa y una sucursal; varias ubicaciones de inventario y cajas identificadas en esa sucursal.</td>
+</tr>
+<tr>
+<td>Catálogo, stock por ubicación, reservas parciales, movimientos, importación/exportación CSV y solicitudes internas de compra</td>
+<td>Una solicitud no compra a proveedores ni aumenta existencias. No se contempla reposición automática.</td>
+</tr>
+<tr>
+<td>Reparaciones y armados con presupuestos versionados, aprobaciones registradas y controles de compatibilidad</td>
+<td>La aprobación registra conformidad obtenida por un canal real. No envía mensajes ni certifica compatibilidad sin evidencia.</td>
+</tr>
+<tr>
+<td>POS, anticipos, cobros, anulaciones completas de POS, devoluciones de pagos de órdenes/proyectos, arqueos y auditoría</td>
+<td>Pagos registrados, no procesados por el sistema. El POS no vende a crédito en V1. Las devoluciones parciales de ventas quedan fuera de esta propuesta inicial.</td>
+</tr>
+<tr>
+<td>Comprobante de recepción, presupuesto y comprobantes internos imprimibles</td>
+<td>No son documentos tributarios. Emisión fiscal, pasarelas, correo y WhatsApp requieren integraciones reales.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Decisión estructural:</strong> un monolito modular en PHP y una base MySQL. Los módulos conservan fronteras de negocio, pero comparten transacciones locales. Por ejemplo, la venta, sus cobros y la salida de inventario se confirman juntos o no se registra ninguno. No se necesita un bus, un servicio separado para caja ni consistencia eventual para estas operaciones.</p>
+<h3 id="arquitectura--2-diagrama-de-arquitectura">2. Diagrama de arquitectura</h3>
+<figure class="diagram"><div aria-label="Diagrama desplazable" class="diagram-scroll" role="region" tabindex="0"><img alt="Diagrama de arquitectura: el navegador obtiene archivos estáticos del servidor web y llama a la API del mismo origen; PHP pasa por middleware, controladores, servicios y repositorios; solo el backend accede a MySQL y archivos privados." decoding="async" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDQwIDQ3OSIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsbGVkYnk9InRpdGxlIGRlc2MiPgo8dGl0bGUgaWQ9InRpdGxlIj5BcnF1aXRlY3R1cmEgZGUgS1JPTk9TIFRFQ0g8L3RpdGxlPjxkZXNjIGlkPSJkZXNjIj5NaXNtbyBvcmlnZW4gcGFyYSBmcm9udGVuZCB5IEFQSS4gRWwgYmFja2VuZCBQSFAgcGFzYSBwb3IgY2FwYXM7IHJlcG9zaXRvcmlvcyBhY2NlZGVuIGEgTXlTUUwuIExvcyBhcmNoaXZvcyBxdWVkYW4gcHJpdmFkb3MgeSBmaXNjYWwgZXMgdW5hIGludGVncmFjacOzbiBmdXR1cmEuPC9kZXNjPgo8ZGVmcz48bWFya2VyIGlkPSJhcnJvdyIgbWFya2VyV2lkdGg9IjkiIG1hcmtlckhlaWdodD0iOSIgcmVmWD0iNy4yIiByZWZZPSI0LjUiIG9yaWVudD0iYXV0byIgbWFya2VyVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDAuNSAxIEwgNy4yIDQuNSBMIDAuNSA4IiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS40NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9tYXJrZXI+PC9kZWZzPgo8cmVjdCB4PSIwLjUiIHk9IjAuNSIgd2lkdGg9IjEwMzkiIGhlaWdodD0iNDc4IiByeD0iMTYiIGZpbGw9IiNmM2Y3ZmIiIHN0cm9rZT0iI2M5ZDllNyIvPgo8dGV4dCB4PSIyOSIgeT0iMzAiIGZpbGw9IiM1ODcxOGEiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxLjUiPlRPUE9MT0fDjUEgTMOTR0lDQSAgLyAgVU5BIEFQTElDQUNJw5NOIFBIUCwgVU5BIEJBU0UgREUgREFUT1M8L3RleHQ+CjxwYXRoIGQ9Ik0gMzIzIDExMiBIIDM3MyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNzY5MWE4IiBzdHJva2Utd2lkdGg9IjEuNjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz48cGF0aCBkPSJNIDY2OCAxMTIgSCA3MTgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjY1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+PHBhdGggZD0iTSA4NjYgMTU2IFYgMTc5IEggMTQyIFYgMjIzIiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS42NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPjxwYXRoIGQ9Ik0gMjUwIDI2MyBIIDI3OCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNzY5MWE4IiBzdHJva2Utd2lkdGg9IjEuNjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz48cGF0aCBkPSJNIDUwMCAyNjMgSCA1MjgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjY1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+PHBhdGggZD0iTSA3NTAgMjYzIEggNzc4IiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS42NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPjxwYXRoIGQ9Ik0gNjM4IDMwMiBWIDM2NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNzY5MWE4IiBzdHJva2Utd2lkdGg9IjEuNjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz48cGF0aCBkPSJNIDg4OCAzMDIgViAzNjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjY1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+PHBhdGggZD0iTSA1NzMgMzAyIFYgMzI5IEggMTQyIFYgMzY1IiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS42NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSI1IDUiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+CjxyZWN0IHg9IjI4IiB5PSI2MiIgd2lkdGg9IjI5NSIgaGVpZ2h0PSI5NCIgcng9IjEyIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSI0MyIgeT0iODMiIGZpbGw9IiMyNTU2OGYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj4wMSAgIENMSUVOVEU8L3RleHQ+PHRleHQgeD0iNDMiIHk9IjEwOCIgZmlsbD0iIzE0MmI0NCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+TmF2ZWdhZG9yPC90ZXh0Pjx0ZXh0IHg9IjQzIiB5PSIxMjciIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+SFRNTDUgwrcgQ1NTMyDCtyBKYXZhU2NyaXB0IEVTPC90ZXh0PjxyZWN0IHg9IjM3MyIgeT0iNjIiIHdpZHRoPSIyOTUiIGhlaWdodD0iOTQiIHJ4PSIxMiIgZmlsbD0iI2VkZjRmZiIgc3Ryb2tlPSIjOWJiYWRiIi8+PHRleHQgeD0iMzg4IiB5PSI4MyIgZmlsbD0iIzI1NTY4ZiIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPjAyICAgTUlTTU8gT1JJR0VOPC90ZXh0Pjx0ZXh0IHg9IjM4OCIgeT0iMTA4IiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5TZXJ2aWRvciB3ZWI8L3RleHQ+PHRleHQgeD0iMzg4IiB5PSIxMjciIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+U2lydmUgZnJvbnRlbmQvIHkgZW5ydXRhIC9hcGkvdjE8L3RleHQ+PHJlY3QgeD0iNzE4IiB5PSI2MiIgd2lkdGg9IjI5NCIgaGVpZ2h0PSI5NCIgcng9IjEyIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSI3MzMiIHk9IjgzIiBmaWxsPSIjMjU1NjhmIiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0IiBsZXR0ZXItc3BhY2luZz0iMSI+MDMgICBFTlRSQURBIFBIUDwvdGV4dD48dGV4dCB4PSI3MzMiIHk9IjEwOCIgZmlsbD0iIzE0MmI0NCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+RnJvbnQgY29udHJvbGxlcjwvdGV4dD48dGV4dCB4PSI3MzMiIHk9IjEyNyIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5iYWNrZW5kL3B1YmxpYy9pbmRleC5waHA8L3RleHQ+PHJlY3QgeD0iMjgiIHk9IjIyMyIgd2lkdGg9IjIyMiIgaGVpZ2h0PSI3OSIgcng9IjEyIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSI0MyIgeT0iMjQ0IiBmaWxsPSIjMjU1NjhmIiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0IiBsZXR0ZXItc3BhY2luZz0iMSI+QVBJIC8gMDE8L3RleHQ+PHRleHQgeD0iNDMiIHk9IjI2OSIgZmlsbD0iIzE0MmI0NCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+TWlkZGxld2FyZSB5IHJ1dGFzPC90ZXh0Pjx0ZXh0IHg9IjQzIiB5PSIyODgiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+U2VzacOzbiDCtyBDU1JGIMK3IHBlcm1pc29zPC90ZXh0PjxyZWN0IHg9IjI3OCIgeT0iMjIzIiB3aWR0aD0iMjIyIiBoZWlnaHQ9Ijc5IiByeD0iMTIiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjI5MyIgeT0iMjQ0IiBmaWxsPSIjMjU1NjhmIiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0IiBsZXR0ZXItc3BhY2luZz0iMSI+QVBJIC8gMDI8L3RleHQ+PHRleHQgeD0iMjkzIiB5PSIyNjkiIGZpbGw9IiMxNDJiNDQiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE3IiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPkNvbnRyb2xhZG9yZXM8L3RleHQ+PHRleHQgeD0iMjkzIiB5PSIyODgiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+Q29udHJhdG8gSFRUUCB5IHZhbGlkYWNpw7NuPC90ZXh0PjxyZWN0IHg9IjUyOCIgeT0iMjIzIiB3aWR0aD0iMjIyIiBoZWlnaHQ9Ijc5IiByeD0iMTIiIGZpbGw9IiNlYmY4ZjUiIHN0cm9rZT0iIzcyYjRhOSIvPjx0ZXh0IHg9IjU0MyIgeT0iMjQ0IiBmaWxsPSIjMDc2ZDYzIiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0IiBsZXR0ZXItc3BhY2luZz0iMSI+QVBJIC8gMDM8L3RleHQ+PHRleHQgeD0iNTQzIiB5PSIyNjkiIGZpbGw9IiMxNDJiNDQiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE3IiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPlNlcnZpY2lvczwvdGV4dD48dGV4dCB4PSI1NDMiIHk9IjI4OCIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5SZWdsYXMgeSB0cmFuc2FjY2lvbmVzPC90ZXh0PjxyZWN0IHg9Ijc3OCIgeT0iMjIzIiB3aWR0aD0iMjM0IiBoZWlnaHQ9Ijc5IiByeD0iMTIiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9Ijc5MyIgeT0iMjQ0IiBmaWxsPSIjMjU1NjhmIiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0IiBsZXR0ZXItc3BhY2luZz0iMSI+QVBJIC8gMDQ8L3RleHQ+PHRleHQgeD0iNzkzIiB5PSIyNjkiIGZpbGw9IiMxNDJiNDQiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE3IiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPlJlcG9zaXRvcmlvczwvdGV4dD48dGV4dCB4PSI3OTMiIHk9IjI4OCIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5Db25zdWx0YXMgeSBibG9xdWVvcyBjb24gUERPPC90ZXh0PjxyZWN0IHg9IjI4IiB5PSIzNjUiIHdpZHRoPSIyMjIiIGhlaWdodD0iNzkiIHJ4PSIxMiIgZmlsbD0iI2ZjZjZlOSIgc3Ryb2tlPSIjZGVjNDk2Ii8+PHRleHQgeD0iNDMiIHk9IjM4NiIgZmlsbD0iIzc5NTAxYSIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPklOVEVHUkFDScOTTiBGVVRVUkE8L3RleHQ+PHRleHQgeD0iNDMiIHk9IjQxMSIgZmlsbD0iIzE0MmI0NCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+RW1pc2nDs24gZmlzY2FsPC90ZXh0Pjx0ZXh0IHg9IjQzIiB5PSI0MzAiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+UHJvdmVlZG9yIGV4dGVybm8gcGVuZGllbnRlPC90ZXh0PjxyZWN0IHg9IjUyOCIgeT0iMzY1IiB3aWR0aD0iMjIyIiBoZWlnaHQ9Ijc5IiByeD0iMTIiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjU0MyIgeT0iMzg2IiBmaWxsPSIjMjU1NjhmIiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0IiBsZXR0ZXItc3BhY2luZz0iMSI+QUxNQUNFTkFNSUVOVE88L3RleHQ+PHRleHQgeD0iNTQzIiB5PSI0MTEiIGZpbGw9IiMxNDJiNDQiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE3IiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPkFyY2hpdm9zIHByaXZhZG9zPC90ZXh0Pjx0ZXh0IHg9IjU0MyIgeT0iNDMwIiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPkZvdG9zIHkgZmlybWEgwrcgYWNjZXNvIHBvciBBUEk8L3RleHQ+PHJlY3QgeD0iNzc4IiB5PSIzNjUiIHdpZHRoPSIyMzQiIGhlaWdodD0iNzkiIHJ4PSIxMiIgZmlsbD0iI2VkZjRmZiIgc3Ryb2tlPSIjOWJiYWRiIi8+PHRleHQgeD0iNzkzIiB5PSIzODYiIGZpbGw9IiMyNTU2OGYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj5CQVNFIERFIERBVE9TPC90ZXh0Pjx0ZXh0IHg9Ijc5MyIgeT0iNDExIiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5NeVNRTCA4IMK3IElubm9EQjwvdGV4dD48dGV4dCB4PSI3OTMiIHk9IjQzMCIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5GSyDCtyDDrW5kaWNlcyDCtyB0cmFuc2FjY2lvbmVzPC90ZXh0Pgo8cmVjdCB4PSIzMjUuMCIgeT0iODgiIHdpZHRoPSI0NiIgaGVpZ2h0PSIyMSIgcng9IjciIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjM0OCIgeT0iMTAyIiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SFRUUFM8L3RleHQ+PHJlY3QgeD0iNjc3LjAiIHk9Ijg4IiB3aWR0aD0iMzQiIGhlaWdodD0iMjEiIHJ4PSI3IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSI2OTQiIHk9IjEwMiIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFQSTwvdGV4dD48cmVjdCB4PSI0MDkuNSIgeT0iMTY2IiB3aWR0aD0iMTkxIiBoZWlnaHQ9IjIxIiByeD0iNyIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzlkOWU3Ii8+PHRleHQgeD0iNTA1IiB5PSIxODAiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Qcm9jZXNhbWllbnRvIGRlIGxhIHNvbGljaXR1ZDwvdGV4dD48cmVjdCB4PSIyODAuNSIgeT0iMzE2IiB3aWR0aD0iMTI1IiBoZWlnaHQ9IjIxIiByeD0iNyIgZmlsbD0iI2ZjZjZlOSIgc3Ryb2tlPSIjZGVjNDk2Ii8+PHRleHQgeD0iMzQzIiB5PSIzMzAiIGZpbGw9IiM3OTUwMWEiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5EZXNwdcOpcyBkZWwgY29tbWl0PC90ZXh0Pgo8dGV4dCB4PSIyOSIgeT0iNDYxIiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMS44IiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPkVsIG5hdmVnYWRvciBudW5jYSBzZSBjb25lY3RhIGEgTXlTUUwgbmkgYWNjZWRlIGEgYXJjaGl2b3MgcG9yIHJ1dGFzIGRpcmVjdGFzLjwvdGV4dD4KPC9zdmc+Cg=="/></div><figcaption>Diagrama de arquitectura: el navegador obtiene archivos estáticos del servidor web y llama a la API del mismo origen; PHP pasa por middleware, controladores, servicios y repositorios; solo el backend accede a MySQL y archivos privados.</figcaption></figure>
+<ul>
+<li><strong>Navegador:</strong> HTML5 semántico, CSS3 y módulos JavaScript ES. <code>fetch</code> consume <code>/api/v1</code>. No se mezclan vistas con PHP ni se ponen credenciales o reglas de autoridad en el cliente.</li>
+<li><strong>Entrada HTTP:</strong> un servidor web en HTTPS publica <code>frontend/</code> y enruta <code>/api/v1/*</code> al único punto de entrada <code>backend/public/index.php</code> con PHP-FPM. El resto de <code>backend/</code>, <code>database/</code> y la configuración nunca se sirven como archivos estáticos. En local se mantiene el mismo origen.</li>
+<li><strong>Backend:</strong> PHP 8.2 o superior, namespaces y autoload PSR-4 mediante Composer. Router, objetos de solicitud/respuesta y composición sencillos, sin framework. La API responde JSON salvo archivos privados y exportaciones documentadas.</li>
+<li><strong>Datos:</strong> MySQL 8 con InnoDB, <code>utf8mb4</code>, claves foráneas y <code>CHECK</code> efectivamente aplicados (8.0.16+; preferir una rama 8.x con soporte). PDO usa parámetros preparados, excepciones y emulación de preparados desactivada. La cuenta de migración tiene DDL; la aplicación no.</li>
+<li><strong>Archivos privados:</strong> fotos y firma de recepción fuera del directorio público. No se entregan URLs directas al almacenamiento; la API evalúa identidad, recurso y finalidad antes de servirlos.</li>
+</ul>
+<h4 id="arquitectura--capas-y-direccion-de-dependencias">Capas y dirección de dependencias</h4>
+<div aria-label="Tabla: Capas y dirección de dependencias" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Capa</th>
+<th scope="col">Responsabilidad</th>
+<th scope="col">Límite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Frontend</td>
+<td>Navegación, atención al usuario, estado de formularios y validaciones de ayuda.</td>
+<td>No fija precios, no decide permisos ni genera saldos definitivos.</td>
+</tr>
+<tr>
+<td>Router y middleware</td>
+<td>Ruta/método, sesión, CSRF, límites, URL y permisos generales; identificación de solicitud.</td>
+<td>No decide si una orden, pago o reserva puede cambiar de estado.</td>
+</tr>
+<tr>
+<td>Controlador y validador</td>
+<td>Validar forma, tipos y campos permitidos; mapear errores a HTTP; delegar al caso de uso.</td>
+<td>No consulta PDO directamente ni administra transacciones.</td>
+</tr>
+<tr>
+<td>Servicio de negocio</td>
+<td>Autorizar sobre el recurso, validar invariantes, coordinar repositorios y transacciones.</td>
+<td>Un caso de uso dueño de la transacción; otros servicios participan en ella sin confirmarla por su cuenta.</td>
+</tr>
+<tr>
+<td>Repositorio / acceso a datos</td>
+<td>Consultas preparadas, proyecciones y bloqueos explícitos; almacenar con la misma conexión del caso de uso.</td>
+<td>No confía en parámetros para nombres de tabla/columna y no resuelve políticas de negocio.</td>
+</tr>
+<tr>
+<td>Adaptadores</td>
+<td>Sesión, cifrado, sistema de archivos, reloj, SQL y futura emisión fiscal.</td>
+<td>Ninguna llamada externa dentro de una transacción comercial.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Dependencias funcionales.</strong> Órdenes y armados consultan Catálogo e Inventario, y delegan cobros a Pagos. Ventas coordina Inventario + Pagos. Pagos exige un turno válido de Caja, pero Caja no vuelve a contabilizar el pago como un ingreso manual. Presupuestos registra la versión comercial y su aprobación, con destino en Orden o Armado. Dashboard lee proyecciones autorizadas; Auditoría recibe eventos de comandos sensibles en su propia transacción de negocio, no al margen de ella.</p>
+<h3 id="arquitectura--3-estructura-objetivo-del-repositorio">3. Estructura objetivo del repositorio</h3>
+<p>La estructura siguiente es de <strong>implementación prevista</strong>. Esta entrega crea únicamente documentación, no un proyecto ejecutable.</p>
+<pre><code class="language-text">kronos-tech/
+├── frontend/
+│   ├── index.html                     # Entrada; dirige según sesión
+│   ├── pages/
+│   │   ├── login.html
+│   │   ├── dashboard.html
+│   │   ├── ordenes.html
+│   │   ├── nueva-orden.html
+│   │   ├── detalle-orden.html
+│   │   ├── clientes.html
+│   │   ├── inventario.html
+│   │   ├── armados.html
+│   │   ├── ventas.html
+│   │   ├── caja.html
+│   │   └── administracion.html        # Usuarios, permisos, configuración y auditoría
+│   └── assets/
+│       ├── css/{tokens.css,base.css,layout.css,components.css,pages/}
+│       ├── js/{config/,api/,components/,modules/,utils/}
+│       └── images/
+├── backend/
+│   ├── public/index.php
+│   ├── routes/api.php
+│   ├── src/
+│   │   ├── Controllers/               # Auth, Orders, Inventory, Sales, etc.
+│   │   ├── Services/                  # Casos de uso agrupados por dominio
+│   │   ├── Repositories/              # Consultas y persistencia PDO
+│   │   ├── Models/                    # Estados, entidades y valores de dominio
+│   │   ├── Middleware/
+│   │   ├── Validators/
+│   │   ├── Exceptions/
+│   │   └── Support/                   # Conexión, transacciones, reloj, dinero, archivos
+│   ├── config/
+│   ├── storage/{logs/,uploads/,exports/}
+│   ├── tests/{unit/,integration/,e2e/}
+│   ├── composer.json
+│   └── .env.example
+├── database/{migrations/,seeders/,schema.sql}
+├── docs/{arquitectura.md,modelo-datos.md,reglas-negocio.md,api.md,
+│         plan-y-pruebas.md,instalacion.md,diagramas/}
+├── .gitignore
+└── README.md
+</code></pre>
+<p><code>database/migrations/</code> será la fuente del esquema; <code>schema.sql</code>, una instantánea comprobable, no un segundo camino que se ejecute después de migrar. Los medios de prueba serán ficticios; el usuario administrador real se crea de manera controlada, sin contraseña fija en el repositorio.</p>
+<h3 id="arquitectura--4-experiencia-de-uso-y-figma">4. Experiencia de uso y Figma</h3>
+<p>No se adjuntaron enlaces ni exportaciones de Figma. La arquitectura fija las responsabilidades de cada pantalla, pero no afirma haber revisado la referencia ni define en su nombre colores, grillas o puntos de quiebre definitivos. El enlace público de solo lectura o las exportaciones de escritorio y móvil permiten cerrar la correspondencia entre pantallas y componentes.</p>
+<div aria-label="Tabla: 4. Experiencia de uso y Figma" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Pantalla</th>
+<th scope="col">Comportamiento de escritorio y móvil</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Inicio y sesión</td>
+<td>Login con etiquetas y error no revelador; navegación por rol; indicador de turno con aviso cuando no se pueda cobrar. Si vence sesión, proteger el borrador ya persistido y volver al recurso después de autenticar.</td>
+</tr>
+<tr>
+<td>Dashboard</td>
+<td>Indicadores con período y alcance, agenda editable, alertas y actividad. En móvil, orden de lectura lineal; sin indicadores de comparación inventados.</td>
+</tr>
+<tr>
+<td>Órdenes y detalle</td>
+<td>Filtros y paginación conservados en la URL, listado/CSV con el mismo alcance. En móvil, tarjetas con estado, equipo, prioridad y acción principal; el detalle separa recepción, taller, presupuesto y pagos según permiso.</td>
+</tr>
+<tr>
+<td>Nueva orden</td>
+<td>Etapas Cliente → Equipo y recepción → Servicio y presupuesto → Revisión y conformidad. Guardado explícito y recuperación del borrador; se conserva un solo paso activo en móvil. Cualquier cobro ocurre únicamente al confirmar.</td>
+</tr>
+<tr>
+<td>Clientes e inventario</td>
+<td>Buscador reutilizable. Aviso de duplicados antes del alta; productos con físico/reservado/disponible, historial y previsualización de importación.</td>
+</tr>
+<tr>
+<td>Armados</td>
+<td>Componentes y mano de obra, avisos de compatibilidad con causa, cotización imprimible y avances. Los costos internos no se incluyen en el documento al cliente.</td>
+</tr>
+<tr>
+<td>Ventas y caja</td>
+<td>Carrito y totales visibles, medios separados y cambio en efectivo; confirmación única. En móvil, búsqueda y resumen accesibles sin depender de un ancho de escritorio. Arqueo conserva esperado, contado y diferencia.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Componentes: navegación, cabecera de turno, filtros, badges con texto, diálogo de confirmación, paginación, campos y mensajes, resumen monetario, tabla/tarjeta y hoja imprimible. Los tokens CSS se ajustan al revisar Figma. Requisitos comunes: navegación por teclado, foco visible y restaurado al cerrar diálogos, etiquetas persistentes, errores asociados a cada campo, anuncios de estado, contraste y no depender del color. Mostrar carga, vacío, error y éxito; no devolver una lista vacía en lugar de un error. Sin botones que prometan operaciones externas inexistentes.</p>
+<h3 id="arquitectura--5-matriz-de-roles-y-permisos">5. Matriz de roles y permisos</h3>
+<p>Los códigos se asignan vía <code>role_permissions</code> y <code>user_roles</code>. El servidor combina permisos efectivos y, por separado, alcance y proyección de campos. <strong>Propio</strong> significa borrador creado por el usuario o turno vigente del que es responsable; <strong>asignado</strong> se deriva del técnico del recurso, no de un ID enviado por el navegador. Un administrador puede intervenir un turno ajeno con un permiso distinto, referencia explícita a ese turno y motivo auditado.</p>
+<div aria-label="Tabla: 5. Matriz de roles y permisos" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Permisos</th>
+<th scope="col">Administrador</th>
+<th scope="col">Recepción / ventas</th>
+<th scope="col">Técnico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dashboard.read</code>, <code>agenda.read</code>, <code>agenda.write</code></td>
+<td>Global</td>
+<td>Operación de la sucursal</td>
+<td>Lectura de agenda/indicadores asignados, sin totales financieros</td>
+</tr>
+<tr>
+<td><code>customers.read/write</code>, <code>devices.read/write</code></td>
+<td>Sí</td>
+<td>Sí</td>
+<td>Datos mínimos solo desde la orden asignada, sin listado general ni cambios</td>
+</tr>
+<tr>
+<td><code>orders.read</code>, <code>orders.export</code></td>
+<td>Sí</td>
+<td>Sí</td>
+<td>Lectura asignada, sin exportación ni campos financieros</td>
+</tr>
+<tr>
+<td><code>orders.receive</code>, <code>orders.assign</code>, <code>orders.deliver</code></td>
+<td>Sí</td>
+<td>Sí; asignar técnicos habilitados y confirmar entrega</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>orders.tech</code>, <code>orders.cancel</code></td>
+<td>Ambos</td>
+<td>No</td>
+<td><code>orders.tech</code> asignado: diagnóstico, tareas, pruebas y avances; no cancelar</td>
+</tr>
+<tr>
+<td><code>orders.access.write</code>, <code>orders.access.reveal</code></td>
+<td>Ambos</td>
+<td>Solo escribir o retirar, no revelar</td>
+<td>Revelar únicamente en su orden asignada, con reautenticación y motivo</td>
+</tr>
+<tr>
+<td><code>catalog.read</code>, <code>stock.read</code></td>
+<td>Sí</td>
+<td>Sí; precio comercial</td>
+<td>Solo proyección de datos técnicos y disponibilidad, sin costos ni precios internos</td>
+</tr>
+<tr>
+<td><code>catalog.manage</code>, <code>costs.read</code>, <code>stock.adjust</code>, <code>stock.import</code></td>
+<td>Sí</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>stock.reserve</code>, <code>stock.consume</code>, <code>purchase.request</code>, <code>purchase.manage</code></td>
+<td>Sí</td>
+<td>Solicitar compra</td>
+<td>Reservar/liberar/consumir en sus órdenes o armados; solicitar compra</td>
+</tr>
+<tr>
+<td><code>projects.read</code>, <code>projects.manage</code>, <code>projects.tech</code>, <code>projects.deliver</code>, <code>projects.cancel</code></td>
+<td>Sí</td>
+<td>Lectura, gestión comercial y entrega</td>
+<td>Lectura asignada y trabajo técnico (incluidas propuestas de componentes en borrador), sin costos</td>
+</tr>
+<tr>
+<td><code>quotes.read</code>, <code>quotes.manage</code>, <code>quotes.approve</code></td>
+<td>Sí</td>
+<td>Edición comercial y registro de decisión del cliente; sin costos ni autorización de descuentos propia</td>
+<td>Solo estado de cotización desde el recurso asignado</td>
+</tr>
+<tr>
+<td><code>sales.read</code>, <code>sales.create</code>, <code>pricing.discount</code>, <code>sales.void</code></td>
+<td>Sí</td>
+<td>Consulta y confirmación; no autoriza descuentos ni anula</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>payments.post</code>, <code>payments.refund</code></td>
+<td>Ambos</td>
+<td>Cobrar en turno propio</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>cash.read</code>, <code>cash.operate</code>, <code>cash.override</code></td>
+<td>Todos</td>
+<td>Leer y operar su turno (apertura, arqueo, movimientos permitidos y cierre)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>audit.read</code>, <code>reports.read</code>, <code>users.manage</code>, <code>settings.manage</code></td>
+<td>Sí</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</tbody>
+</table></div>
+<p>Los permisos agrupados como <code>customers.read/write</code> representan <code>customers.read</code> y <code>customers.write</code>. Una técnica o un técnico no ve el saldo general del cliente aunque conozca su ID. Si una persona tiene múltiples roles, el acceso adicional es explícito y auditable. Filtros, detalle, CSV y archivos aplican el mismo alcance. Cambios de roles, asignaciones y desactivaciones tienen efecto en la siguiente solicitud; no se confía en roles guardados en el frontend.</p>
+<h3 id="arquitectura--6-seguridad-y-operacion">6. Seguridad y operación</h3>
+<ul>
+<li><strong>Identidad:</strong> <code>password_hash()</code> / <code>password_verify()</code>, <code>password_needs_rehash()</code> cuando corresponda. Login por usuario o correo normalizados; mensaje genérico ante credenciales inválidas y límite de intentos por identificador e IP. No confiar en cabeceras de proxy salvo de proxies conocidos. Bloquear cuentas desactivadas y preservar al menos un administrador habilitado.</li>
+<li><strong>Sesión y CSRF:</strong> sesión opaca de servidor, ID regenerado en login y sesión invalidada en logout. Propuesta inicial: 30 minutos de inactividad y 8 horas absolutas, independientes del turno. Cookie host-only, <code>HttpOnly</code>, <code>SameSite=Lax</code>, <code>Secure</code> en HTTPS y modo estricto de PHP. Token sincronizado también para login y validado en toda operación mutante. El cliente no guarda secretos ni IDs de sesión en <code>localStorage</code>. Liberar el bloqueo de la sesión PHP antes de ejecutar transacciones de negocio, para que las condiciones de concurrencia queden protegidas por MySQL, no por la sesión HTTP.</li>
+<li><strong>Superficie HTTP:</strong> mismo origen, HTTPS, sin CORS abierto. Si se separan orígenes, preferir un reverse proxy; si no es posible, habilitar lista explícita, preflight controlado, <code>credentials</code> solo para el origen aprobado, <code>Vary: Origin</code> y conservar CSRF. Cualquier cambio en <code>SameSite</code> debe revisarse según si el despliegue es también cross-site. Validación con allowlists, escape según contexto y uso de <code>textContent</code> para datos de usuarios. Encabezados CSP y <code>nosniff</code>; las respuestas privadas no se almacenan en cachés compartidas.</li>
+<li><strong>Contraseña temporal del equipo:</strong> opcional, aislada y cifrada por AEAD con <code>libsodium</code>, clave versionada fuera de MySQL, nonce aleatorio y datos asociados a la orden. Proponer 7 días de vigencia como máximo inicial; vencimiento o entrega/cancelación inutilizan el acceso. Nunca incluir en JSON de listados, HTML imprimible, logs, borradores persistidos ni auditoría. Revelación con reautenticación reciente, permiso específico, motivo y respuesta <code>no-store</code>; el evento registra el acceso, no el secreto. La política de copias y rotación debe explicar cuándo desaparecen las copias antiguas.</li>
+<li><strong>Fotografías y firma:</strong> permitir inicialmente JPEG, PNG y WebP para fotos; validar tamaño, extensión, MIME real, decodificación y dimensiones; rechazar SVG/HTML y quitar metadatos innecesarios al recodificar. Usar identificador y ruta generados, sin aceptar rutas del cliente, y servir solo mediante API autorizada. Preparar archivo privado antes de publicar metadatos y limpiar temporales/huérfanos ante fallos. La firma de recepción acredita un registro interno; no se presenta como firma electrónica certificada.</li>
+<li><strong>Auditoría y recuperación:</strong> registrar actor, momento UTC, acción, entidad, alcance y cambios permitidos; no guardar contraseñas, tokens, RUT completos, dumps de solicitudes o archivos. Logs operativos estructurados con identificador de solicitud y errores internos restringidos. Backups cifrados de MySQL y archivos privados con prueba de restauración y plan separado para las llaves; conservación y eliminación de datos a confirmar antes de producción.</li>
+</ul>
+<h3 id="arquitectura--7-decisiones-por-confirmar">7. Decisiones por confirmar</h3>
+<div aria-label="Tabla: 7. Decisiones por confirmar" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Decisión</th>
+<th scope="col">Propuesta de esta arquitectura</th>
+<th scope="col">Momento de confirmación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Figma y flujo visual</td>
+<td>Revisar frames y recorridos reales de escritorio y móvil; aplicar sus tokens sobre los módulos aquí definidos.</td>
+<td>Antes de cerrar UI y aceptación visual. No bloquea la arquitectura ni el diseño de datos.</td>
+</tr>
+<tr>
+<td>Caja y condiciones comerciales</td>
+<td>Una sucursal y varias cajas; un turno abierto por caja y por responsable. Exigir turno incluso para débito/transferencia; sin entrega con saldo pendiente en V1.</td>
+<td>Antes de fijar datos y flujos de cobro. Confirmar si hay cajas compartidas, crédito o entregas con deuda.</td>
+</tr>
+<tr>
+<td>Política tributaria y descuentos</td>
+<td>CLP sin decimales operativos, precios con IVA del 19 % incluido por defecto; descuentos globales autorizados y prorrateados. POS anula ventas completas.</td>
+<td>Validar tratamiento de exentos, redondeo y devolución parcial si se necesita. Definir proveedor y requisitos fiscales por separado.</td>
+</tr>
+<tr>
+<td>Conformidad y conservación</td>
+<td>Confirmación registrada con versión de política, firma según tipo de recepción, anticipo limitado por estimación aceptada, credencial temporal con caducidad.</td>
+<td>Antes de recibir datos reales: texto de autorizaciones, plazos de fotos/firmas/auditoría y reglas de reembolso.</td>
+</tr>
+<tr>
+<td>Despliegue y escala</td>
+<td>Un servicio PHP y MySQL como primera topología; backups y restauración comprobables.</td>
+<td>Antes de producción: hosting, volumen, uso simultáneo, traspaso de datos y objetivos de recuperación.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Para el detalle de entidades y claves, ver <a href="#datos">Modelo de datos</a>. Los flujos monetarios y de concurrencia están en <a href="#reglas">Reglas de negocio</a>; los contratos y criterios de entrega, en <a href="#api">API REST</a> y <a href="#plan">Plan y pruebas</a>.</p>
+</div>
+<a class="to-top" href="#inicio">↑ Volver al índice</a>
+</article>
+<article class="chapter" id="datos" aria-labelledby="datos-title">
+<div class="chapter-head"><span class="unit" aria-hidden="true">02</span><div><div class="chapter-kicker">CAPÍTULO 02 / 06</div><h2 id="datos-title">Modelo de datos</h2><p>Relaciones, diccionario, restricciones e índices.</p></div></div>
+<nav class="subindex" aria-label="En este capítulo"><a href="#datos--1-convenciones">Convenciones</a><a href="#datos--2-personas-servicio-y-presupuestos">Personas, servicio y presupuestos</a><a href="#datos--3-catalogo-e-inventario">Catálogo e inventario</a><a href="#datos--4-ventas-cobros-y-caja">Ventas, cobros y caja</a><a href="#datos--5-operacion-trazabilidad-y-soporte">Operación, trazabilidad y soporte</a></nav>
+<div class="prose">
+<h3 id="datos--1-convenciones">1. Convenciones</h3>
+<ul>
+<li><strong>Motor y texto:</strong> InnoDB y <code>utf8mb4</code>. Colación insensible a mayúsculas/acentos para búsquedas humanas; claves de negocio normalizadas con comparación determinista. PK <code>BIGINT UNSIGNED</code> salvo tablas puente y claves naturales expresas. Los identificadores se serializan como cadenas en JSON para no perder precisión en JavaScript.</li>
+<li><strong>Estado y fechas:</strong> códigos de estado controlados con <code>CHECK</code> y validación de transiciones en servicios. Timestamps <code>DATETIME(6)</code> en UTC; API en RFC 3339. Fechas civiles y períodos operativos en <code>America/Santiago</code> inicialmente. Las FK de documentos y movimientos usan <code>RESTRICT</code>; no se borran documentos confirmados. Las tablas puente de acceso pueden retirar una relación con auditoría.</li>
+<li><strong>Importes:</strong> <code>DECIMAL(18,4)</code> en catálogo, documentos y mayor de pagos. Moneda ISO y escala operativa se guardan en las cabeceras monetarias; CLP inicia a escala 0. Los unitarios, cantidades, tasas, descuentos, totales y costos cuando corresponda quedan congelados en los detalles confirmados. <code>tax_bps</code> entero; <code>1900</code> representa 19 %. Cantidades físicas enteras; <code>delta</code> de inventario es entero con signo.</li>
+<li><strong>Versiones:</strong> cabeceras editables con <code>version</code> incremental; hechos confirmados por adición de eventos o contramovimientos. Números de recepción, proyecto y venta mediante prefijo estable e ID autoincremental (<code>OT-…</code>, <code>PC-…</code>, <code>VTA-…</code>); la OT solo se muestra numerada tras confirmar. Sin <code>MAX(id)+1</code>; se admiten huecos. El proveedor fiscal, si llega, asigna su propia numeración.</li>
+<li><strong>Relaciones polimórficas:</strong> <code>quotes</code>, <code>receivables</code>, <code>stock_reservations</code> y auditoría usan FK explícitas y restricciones de exclusión, no un par libre <code>tipo/id</code>. Los servicios verifican además pertenencia, tipo permitido y restricciones entre filas bajo bloqueo. Las tablas siguientes son de diseño, no DDL ejecutado.</li>
+</ul>
+<h3 id="datos--2-personas-servicio-y-presupuestos">2. Personas, servicio y presupuestos</h3>
+<figure class="diagram"><div aria-label="Diagrama desplazable" class="diagram-scroll" role="region" tabindex="0"><img alt="ER de operación: un cliente posee equipos, recibe órdenes y puede tener proyectos; órdenes y proyectos tienen sus propios detalles y son destinos excluyentes de un presupuesto." decoding="async" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDQwIDU0NiIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsbGVkYnk9InRpdGxlIGRlc2MiPgo8dGl0bGUgaWQ9InRpdGxlIj5FUiBkZSBjbGllbnRlcywgw7NyZGVuZXMgeSBwcm95ZWN0b3M8L3RpdGxlPjxkZXNjIGlkPSJkZXNjIj5DbGllbnRlcyB0aWVuZW4gZXF1aXBvcywgw7NyZGVuZXMgeSBhcm1hZG9zLiBPcmRlbiB5IHByb3llY3RvIHNvbiBkZXN0aW5vcyBleGNsdXllbnRlcyBkZSB1biBwcmVzdXB1ZXN0bzsgbG9zIGRldGFsbGVzIGd1YXJkYW4gc3VzIHByb3Bpb3MgaGlzdG9yaWFsZXMuPC9kZXNjPgo8ZGVmcz48bWFya2VyIGlkPSJhcnJvdyIgbWFya2VyV2lkdGg9IjkiIG1hcmtlckhlaWdodD0iOSIgcmVmWD0iNy4yIiByZWZZPSI0LjUiIG9yaWVudD0iYXV0byIgbWFya2VyVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDAuNSAxIEwgNy4yIDQuNSBMIDAuNSA4IiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS40NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9tYXJrZXI+PC9kZWZzPgo8cmVjdCB4PSIwLjUiIHk9IjAuNSIgd2lkdGg9IjEwMzkiIGhlaWdodD0iNTQ1IiByeD0iMTYiIGZpbGw9IiNmM2Y3ZmIiIHN0cm9rZT0iI2M5ZDllNyIvPgo8dGV4dCB4PSIyOSIgeT0iMzAiIGZpbGw9IiM1ODcxOGEiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxLjUiPk1PREVMTyBFTlRJREFE4oCTUkVMQUNJw5NOICAvICBPUEVSQUNJw5NOIFkgUFJFU1VQVUVTVE9TPC90ZXh0Pgo8cGF0aCBkPSJNIDUyMCAxMTkgViAxNDIgSCAxNjYgViAxNjgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjY1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+PHBhdGggZD0iTSA1MjAgMTQyIFYgMTY4IiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS42NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPjxwYXRoIGQ9Ik0gNTIwIDE0MiBIIDg3NCBWIDE2OCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNzY5MWE4IiBzdHJva2Utd2lkdGg9IjEuNjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz48cGF0aCBkPSJNIDI5NiAyMTMgSCAzOTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjY1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+PHBhdGggZD0iTSA0NDUgMjQ1IFYgMjg2IEggMTY2IFYgMzI4IiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS42NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPjxwYXRoIGQ9Ik0gOTM3IDI0NSBWIDI4NiBIIDg3NCBWIDMyOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNzY5MWE4IiBzdHJva2Utd2lkdGg9IjEuNjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz48cGF0aCBkPSJNIDU0OCAyNDUgViAyNzIgSCA0NzggViAzMjgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjY1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1kYXNoYXJyYXk9IjUgNSIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz48cGF0aCBkPSJNIDc4OSAyNDUgViAyNzIgSCA1NjQgViAzMjgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjY1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1kYXNoYXJyYXk9IjUgNSIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz48cGF0aCBkPSJNIDUyMCA0MDYgViA0NDYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjY1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+CjxyZWN0IHg9IjM4NCIgeT0iNDMiIHdpZHRoPSIyNzIiIGhlaWdodD0iNzYiIHJ4PSIxMiIgZmlsbD0iI2VkZjRmZiIgc3Ryb2tlPSIjOWJiYWRiIi8+PHRleHQgeD0iMzk5IiB5PSI2NCIgZmlsbD0iIzI1NTY4ZiIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPlBFUlNPTkFTPC90ZXh0Pjx0ZXh0IHg9IjM5OSIgeT0iODkiIGZpbGw9IiMxNDJiNDQiIGZvbnQtZmFtaWx5PSJ1aS1tb25vc3BhY2UsIFNGTW9uby1SZWd1bGFyLCBDb25zb2xhcywgbW9ub3NwYWNlIiBmb250LXNpemU9IjE3IiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPmN1c3RvbWVyczwvdGV4dD48dGV4dCB4PSIzOTkiIHk9IjEwOCIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5Qcm9waWV0YXJpbyBvIGNsaWVudGUgY29tZXJjaWFsPC90ZXh0PjxyZWN0IHg9IjM2IiB5PSIxNjgiIHdpZHRoPSIyNjAiIGhlaWdodD0iNzciIHJ4PSIxMiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzlkOWU3Ii8+PHRleHQgeD0iNTEiIHk9IjE4OSIgZmlsbD0iIzI1NTY4ZiIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPkVRVUlQT1M8L3RleHQ+PHRleHQgeD0iNTEiIHk9IjIxNCIgZmlsbD0iIzE0MmI0NCIgZm9udC1mYW1pbHk9InVpLW1vbm9zcGFjZSwgU0ZNb25vLVJlZ3VsYXIsIENvbnNvbGFzLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+ZGV2aWNlczwvdGV4dD48dGV4dCB4PSI1MSIgeT0iMjMzIiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPlBlcmZpbCBlc3RhYmxlIGRlbCBlcXVpcG88L3RleHQ+PHJlY3QgeD0iMzkwIiB5PSIxNjgiIHdpZHRoPSIyNjAiIGhlaWdodD0iNzciIHJ4PSIxMiIgZmlsbD0iI2ViZjhmNSIgc3Ryb2tlPSIjNzJiNGE5Ii8+PHRleHQgeD0iNDA1IiB5PSIxODkiIGZpbGw9IiMwNzZkNjMiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj5TRVJWSUNJTyBUw4lDTklDTzwvdGV4dD48dGV4dCB4PSI0MDUiIHk9IjIxNCIgZmlsbD0iIzE0MmI0NCIgZm9udC1mYW1pbHk9InVpLW1vbm9zcGFjZSwgU0ZNb25vLVJlZ3VsYXIsIENvbnNvbGFzLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+c2VydmljZV9vcmRlcnM8L3RleHQ+PHRleHQgeD0iNDA1IiB5PSIyMzMiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+T1QsIGVzdGFkbyB5IHJlY2VwY2nDs248L3RleHQ+PHJlY3QgeD0iNzQ0IiB5PSIxNjgiIHdpZHRoPSIyNjAiIGhlaWdodD0iNzciIHJ4PSIxMiIgZmlsbD0iI2ViZjhmNSIgc3Ryb2tlPSIjNzJiNGE5Ii8+PHRleHQgeD0iNzU5IiB5PSIxODkiIGZpbGw9IiMwNzZkNjMiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj5BUk1BRE9TPC90ZXh0Pjx0ZXh0IHg9Ijc1OSIgeT0iMjE0IiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0idWktbW9ub3NwYWNlLCBTRk1vbm8tUmVndWxhciwgQ29uc29sYXMsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5wY19wcm9qZWN0czwvdGV4dD48dGV4dCB4PSI3NTkiIHk9IjIzMyIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5Qcm95ZWN0byBudWV2byBvIG1lam9yYTwvdGV4dD48cmVjdCB4PSIzNiIgeT0iMzI4IiB3aWR0aD0iMzAwIiBoZWlnaHQ9Ijc4IiByeD0iMTIiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjUxIiB5PSIzNDkiIGZpbGw9IiMyNTU2OGYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj5FVklERU5DSUFTIERFIFRBTExFUjwvdGV4dD48dGV4dCB4PSI1MSIgeT0iMzc0IiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5EZXRhbGxlIGRlIGxhIG9yZGVuPC90ZXh0Pjx0ZXh0IHg9IjUxIiB5PSIzOTMiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+VGFyZWFzIMK3IG5vdGFzIMK3IGZvdG9zIMK3IMOtdGVtcyDCtyBoaXN0b3JpYWw8L3RleHQ+PHJlY3QgeD0iMzg2IiB5PSIzMjgiIHdpZHRoPSIyNjgiIGhlaWdodD0iNzgiIHJ4PSIxMiIgZmlsbD0iI2VkZjRmZiIgc3Ryb2tlPSIjOWJiYWRiIi8+PHRleHQgeD0iNDAxIiB5PSIzNDkiIGZpbGw9IiMyNTU2OGYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj5ERVNUSU5PIEVYQ0xVU0lWTzwvdGV4dD48dGV4dCB4PSI0MDEiIHk9IjM3NCIgZmlsbD0iIzE0MmI0NCIgZm9udC1mYW1pbHk9InVpLW1vbm9zcGFjZSwgU0ZNb25vLVJlZ3VsYXIsIENvbnNvbGFzLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+cXVvdGVzPC90ZXh0Pjx0ZXh0IHg9IjQwMSIgeT0iMzkzIiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPlJldmlzacOzbiBjb21lcmNpYWwgaW5tdXRhYmxlIGFsIGVtaXRpcjwvdGV4dD48cmVjdCB4PSI3MDQiIHk9IjMyOCIgd2lkdGg9IjMwMCIgaGVpZ2h0PSI3OCIgcng9IjEyIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSI3MTkiIHk9IjM0OSIgZmlsbD0iIzI1NTY4ZiIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPkVWSURFTkNJQVMgREUgQVJNQURPPC90ZXh0Pjx0ZXh0IHg9IjcxOSIgeT0iMzc0IiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5EZXRhbGxlIGRlIGFybWFkbzwvdGV4dD48dGV4dCB4PSI3MTkiIHk9IjM5MyIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5Db21wb25lbnRlcyDCtyBhdmFuY2VzIMK3IHBydWViYXM8L3RleHQ+PHJlY3QgeD0iMzg2IiB5PSI0NDYiIHdpZHRoPSIyNjgiIGhlaWdodD0iNjUiIHJ4PSIxMiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzlkOWU3Ii8+PHRleHQgeD0iNDAxIiB5PSI0NzciIGZpbGw9IiMxNDJiNDQiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPkzDrW5lYXMgeSBhcHJvYmFjacOzbjwvdGV4dD48dGV4dCB4PSI0MDEiIHk9IjQ5NyIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij7DjXRlbXMgMTpOIMK3IGRlY2lzacOzbiAxOjAuLjEgcG9yIHZlcnNpw7NuPC90ZXh0Pgo8cmVjdCB4PSIxNDMuMCIgeT0iMTM0IiB3aWR0aD0iNDYiIGhlaWdodD0iMjEiIHJ4PSI3IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSIxNjYiIHk9IjE0OCIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjEgOiBOPC90ZXh0PjxyZWN0IHg9IjQ5Ny4wIiB5PSIxMzQiIHdpZHRoPSI0NiIgaGVpZ2h0PSIyMSIgcng9IjciIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjUyMCIgeT0iMTQ4IiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MSA6IE48L3RleHQ+PHJlY3QgeD0iODUxLjAiIHk9IjEzNCIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjIxIiByeD0iNyIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzlkOWU3Ii8+PHRleHQgeD0iODc0IiB5PSIxNDgiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4xIDogTjwvdGV4dD48cmVjdCB4PSIyOTguNSIgeT0iMTg3IiB3aWR0aD0iODkiIGhlaWdodD0iMjEiIHJ4PSI3IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSIzNDMiIHk9IjIwMSIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmVxdWlwbyAxIDogTjwvdGV4dD48cmVjdCB4PSIyNjQuMCIgeT0iMjczIiB3aWR0aD0iNDYiIGhlaWdodD0iMjEiIHJ4PSI3IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSIyODciIHk9IjI4NyIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjEgOiBOPC90ZXh0PjxyZWN0IHg9Ijg3OC4wIiB5PSIyNzMiIHdpZHRoPSI0NiIgaGVpZ2h0PSIyMSIgcng9IjciIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjkwMSIgeT0iMjg3IiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MSA6IE48L3RleHQ+PHJlY3QgeD0iNTczLjUiIHk9IjI1OSIgd2lkdGg9IjExOSIgaGVpZ2h0PSIyMSIgcng9IjciIGZpbGw9IiNlYmY4ZjUiIHN0cm9rZT0iIzcyYjRhOSIvPjx0ZXh0IHg9IjYzMyIgeT0iMjczIiBmaWxsPSIjMDc2ZDYzIiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MSA6IE4gcG9yIGRlc3Rpbm88L3RleHQ+Cjx0ZXh0IHg9IjI5IiB5PSI1MjgiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExLjgiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+TGFzIGzDrW5lYXMgcHVudGVhZGFzIGluZGljYW4gZGVzdGlub3MgYWx0ZXJuYXRpdm9zIGNvbiBGSyBleHBsw61jaXRhcyB5IHJlc3RyaWNjacOzbiBYT1IuIE4gaW5kaWNhIG11Y2hvcy48L3RleHQ+Cjwvc3ZnPgo="/></div><figcaption>ER de operación: un cliente posee equipos, recibe órdenes y puede tener proyectos; órdenes y proyectos tienen sus propios detalles y son destinos excluyentes de un presupuesto.</figcaption></figure>
+<div aria-label="Tabla: 2. Personas, servicio y presupuestos" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Tabla</th>
+<th scope="col">Campos y propósito principales</th>
+<th scope="col">Restricciones e índices relevantes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>users</code></td>
+<td><code>username_norm</code>, <code>email_norm</code>, <code>password_hash</code>, <code>display_name</code>, <code>is_active</code>, <code>kind</code>, fechas</td>
+<td>Usuario y correo únicos. Identidad <code>system</code> sin login para procesos internos. Datos de sesión fuera de listados.</td>
+</tr>
+<tr>
+<td><code>roles</code>, <code>permissions</code></td>
+<td>Catálogos de acceso con <code>code</code> estable</td>
+<td><code>UNIQUE(code)</code> por tabla.</td>
+</tr>
+<tr>
+<td><code>role_permissions</code>, <code>user_roles</code></td>
+<td>Mapeo de permisos a roles y roles a usuarios</td>
+<td>PK compuesta en cada puente; índice inverso para revocación y consultas.</td>
+</tr>
+<tr>
+<td><code>customers</code></td>
+<td>Nombre, documento original y normalizado, tipo/emisor, teléfono normalizado, correo, dirección/comuna, notas, fechas</td>
+<td>Documento opcional, trío completo si se declara. <code>UNIQUE(document_type, document_issuer, document_norm)</code>. Índices en nombre, teléfono y correo para búsqueda y alertas; teléfono/correo repetidos no bloquean por sí solos.</td>
+</tr>
+<tr>
+<td><code>devices</code></td>
+<td><code>customer_id</code>, tipo, marca, modelo, serie, SO, notas</td>
+<td>FK a cliente y clave candidata <code>(id, customer_id)</code>. Índices <code>(customer_id,id)</code> y <code>serial_norm</code>; serie opcional, aviso de repetición, no unicidad global.</td>
+</tr>
+<tr>
+<td><code>service_orders</code></td>
+<td>Cliente, equipo, técnico, creador, estado/prioridad, falla, diagnóstico, condición visual al ingreso, fechas estimada/real, versión, formulario parcial permitido</td>
+<td>FK <code>(device_id,customer_id)</code> evita asociar equipo ajeno; cliente/equipo obligatorios al confirmar y propietario no transferible en V1. Índices de estado/fecha, técnico/estado/fecha, cliente/fecha y entrega estimada. Borradores solo por creador o admin.</td>
+</tr>
+<tr>
+<td><code>service_order_status_history</code></td>
+<td>Orden, estado anterior/nuevo, actor, motivo y fecha</td>
+<td>FK orden/actor; índice <code>(order_id,id)</code>. Primer evento de confirmación deja la entrada a <code>recibido</code>.</td>
+</tr>
+<tr>
+<td><code>service_order_tasks</code>, <code>service_order_notes</code></td>
+<td>Tareas con responsable, estado, progreso y resultados; notas internas separadas con autor/fecha</td>
+<td>FK a orden/usuario, índices orden/fecha. Progreso entero 0–100, tareas editables con versión, notas aditivas.</td>
+</tr>
+<tr>
+<td><code>service_order_accessories</code></td>
+<td>Orden, tipo/nombre, cantidad, condición; evidencia de ingreso</td>
+<td>FK a orden, cantidad positiva. Copia de ingreso preservada en el comprobante; no se mezcla con el perfil del equipo.</td>
+</tr>
+<tr>
+<td><code>private_files</code>, <code>service_order_photos</code></td>
+<td>Archivo privado con orden propietaria, clase, ruta opaca, MIME, tamaño y fechas; fotos con fase, autor y observación</td>
+<td>URI privada generada única. FK compuesta <code>(file_id,order_id)</code> desde foto; clase de archivo validada. Índice orden/fase.</td>
+</tr>
+<tr>
+<td><code>service_order_consents</code></td>
+<td>Orden, tipo de autorización/verificación, decisión, <code>policy_version_id</code> cuando aplique, responsable, momento, firma privada opcional</td>
+<td>FK a orden, política y archivo de la misma orden. Firma solo de clase admitida. No se reescribe una aceptación registrada.</td>
+</tr>
+<tr>
+<td><code>service_order_receipts</code></td>
+<td>Una instantánea inmutable por OT con datos mínimos de recepción, accesorios, falla, condición y consentimientos referenciados</td>
+<td>PK/FK <code>order_id</code>. Permite reimprimir lo recibido aunque el cliente o el diagnóstico se editen después. No contiene secreto ni datos internos de taller.</td>
+</tr>
+<tr>
+<td><code>service_order_secrets</code></td>
+<td>Credencial opcional de acceso: <code>order_id</code>, cifrado, nonce, <code>key_version</code>, expiración</td>
+<td>PK/FK <code>order_id</code>; índice de expiración. Solo repositorio especializado; se elimina la fila al dejar de ser necesaria.</td>
+</tr>
+<tr>
+<td><code>service_order_items</code></td>
+<td>Servicio/repuesto propuesto, descripción, cantidad, estimación y versión</td>
+<td>FK a orden y XOR de <code>product_id</code> / <code>service_id</code>; clave candidata <code>(id,product_id)</code> para reserva de repuesto real. No crea cobro por existir.</td>
+</tr>
+<tr>
+<td><code>pc_projects</code></td>
+<td>Cliente, técnico, tipo nuevo/mejora, equipo base cuando corresponde, uso, estado, versión, fechas y <code>archived_at</code></td>
+<td>FK equipo/cliente; índices por estado/fecha, cliente y técnico. El archivo no borra el historial.</td>
+</tr>
+<tr>
+<td><code>pc_project_items</code>, <code>pc_project_updates</code></td>
+<td>Componentes/mano de obra; avances, resultados de pruebas y eventos de estado</td>
+<td>FK a proyecto; XOR producto/servicio y clave <code>(id,product_id)</code> en ítems. Avances aditivos, actor/fecha.</td>
+</tr>
+<tr>
+<td><code>quotes</code></td>
+<td><code>service_order_id</code> o <code>pc_project_id</code>, revisión, estado, validez, huella del alcance técnico/comercial, moneda/escala, totales y política tributaria</td>
+<td>Exactamente un destino por <code>CHECK</code> + FK. <code>UNIQUE(service_order_id, revision)</code> y <code>UNIQUE(pc_project_id, revision)</code>, revisión asignada bajo bloqueo del padre. Índice estado/vencimiento.</td>
+</tr>
+<tr>
+<td><code>quote_items</code>, <code>quote_approvals</code></td>
+<td>Líneas congeladas tras emisión; eventos de aprobación/rechazo con procedencia, actor y fecha</td>
+<td>Ítems FK a presupuesto y XOR producto/servicio, con instantáneas y orden de línea. Una decisión terminal por revisión en V1 (<code>UNIQUE(quote_id)</code> en aprobaciones), previa transición válida.</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>policy_versions</code> identifica la versión del texto de consentimiento (tipo, versión, vigencia, texto o huella), de modo que un cambio de política no cambie retroactivamente una recepción. Una credencial de equipo nunca se guarda en <code>devices</code>, notas, <code>service_order_receipts</code> ni payloads de borrador; el almacenamiento parcial es una lista explícita de campos de recepción no secretos.</p>
+<h3 id="datos--3-catalogo-e-inventario">3. Catálogo e inventario</h3>
+<figure class="diagram"><div aria-label="Diagrama desplazable" class="diagram-scroll" role="region" tabindex="0"><img alt="ER de inventario: productos y ubicaciones forman posiciones; un ítem de orden o armado origina una reserva; los eventos de consumo y los ítems de venta originan movimientos físicos." decoding="async" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDQwIDUyNCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsbGVkYnk9InRpdGxlIGRlc2MiPgo8dGl0bGUgaWQ9InRpdGxlIj5FUiBkZSBpbnZlbnRhcmlvPC90aXRsZT48ZGVzYyBpZD0iZGVzYyI+UG9zaWNpw7NuIGlkZW50aWZpY2EgcHJvZHVjdG8geSB1YmljYWNpw7NuLiBSZXNlcnZhIGRlIG9yZGVuIG8gcHJveWVjdG8gc2UgYWN0dWFsaXphIHBvciBldmVudG9zOyBjb25zdW1vIHkgdmVudGEgZ2VuZXJhbiBtb3ZpbWllbnRvcyBmw61zaWNvcy48L2Rlc2M+CjxkZWZzPjxtYXJrZXIgaWQ9ImFycm93IiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI3LjIiIHJlZlk9IjQuNSIgb3JpZW50PSJhdXRvIiBtYXJrZXJVbml0cz0idXNlclNwYWNlT25Vc2UiPjxwYXRoIGQ9Ik0gMC41IDEgTCA3LjIgNC41IEwgMC41IDgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjQ1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L21hcmtlcj48L2RlZnM+CjxyZWN0IHg9IjAuNSIgeT0iMC41IiB3aWR0aD0iMTAzOSIgaGVpZ2h0PSI1MjMiIHJ4PSIxNiIgZmlsbD0iI2YzZjdmYiIgc3Ryb2tlPSIjYzlkOWU3Ii8+Cjx0ZXh0IHg9IjI5IiB5PSIzMCIgZmlsbD0iIzU4NzE4YSIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEuNSI+TU9ERUxPIEVOVElEQUTigJNSRUxBQ0nDk04gIC8gIEVYSVNURU5DSUFTIFkgQ09NUFJPTUlTT1M8L3RleHQ+CjxwYXRoIGQ9Ik0gMzIwIDk3IEggMzc1IiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS42NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPjxwYXRoIGQ9Ik0gNzIwIDk3IEggNjY1IiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS42NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPjxwYXRoIGQ9Ik0gNTIwIDEzNiBWIDIxOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNzY5MWE4IiBzdHJva2Utd2lkdGg9IjEuNjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz48cGF0aCBkPSJNIDYyMCAxMzYgViAxNjIgSCA4NjUgViAyMTgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjY1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+PHBhdGggZD0iTSAzMjAgMjU3IEggMzc1IiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS42NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSI1IDUiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+PHBhdGggZD0iTSA1MjAgMjk2IFYgMzY1IiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS42NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPjxwYXRoIGQ9Ik0gNjY1IDQwNiBIIDgwNSBWIDI5NiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNzY5MWE4IiBzdHJva2Utd2lkdGg9IjEuNjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz48cGF0aCBkPSJNIDE3NyA0NDMgViA0NzIgSCA5MzAgViAyOTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjY1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+CjxyZWN0IHg9IjM0IiB5PSI1OCIgd2lkdGg9IjI4NiIgaGVpZ2h0PSI3OCIgcng9IjEyIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSI0OSIgeT0iNzkiIGZpbGw9IiMyNTU2OGYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj5QUk9EVUNUTzwvdGV4dD48dGV4dCB4PSI0OSIgeT0iMTA0IiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0idWktbW9ub3NwYWNlLCBTRk1vbm8tUmVndWxhciwgQ29uc29sYXMsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5wcm9kdWN0czwvdGV4dD48dGV4dCB4PSI0OSIgeT0iMTIzIiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPlNLVSB5IGNhdMOhbG9nbyBjb21lcmNpYWw8L3RleHQ+PHJlY3QgeD0iMzc1IiB5PSI1OCIgd2lkdGg9IjI5MCIgaGVpZ2h0PSI3OCIgcng9IjEyIiBmaWxsPSIjZWJmOGY1IiBzdHJva2U9IiM3MmI0YTkiLz48dGV4dCB4PSIzOTAiIHk9Ijc5IiBmaWxsPSIjMDc2ZDYzIiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0IiBsZXR0ZXItc3BhY2luZz0iMSI+UEsgUFJPRFVDVE8gKyBVQklDQUNJw5NOPC90ZXh0Pjx0ZXh0IHg9IjM5MCIgeT0iMTA0IiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0idWktbW9ub3NwYWNlLCBTRk1vbm8tUmVndWxhciwgQ29uc29sYXMsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5pbnZlbnRvcnlfYmFsYW5jZXM8L3RleHQ+PHRleHQgeD0iMzkwIiB5PSIxMjMiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+RsOtc2ljbyB5IHJlc2VydmFkbyBwb3IgcG9zaWNpw7NuPC90ZXh0PjxyZWN0IHg9IjcyMCIgeT0iNTgiIHdpZHRoPSIyODYiIGhlaWdodD0iNzgiIHJ4PSIxMiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzlkOWU3Ii8+PHRleHQgeD0iNzM1IiB5PSI3OSIgZmlsbD0iIzI1NTY4ZiIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPlVCSUNBQ0nDk048L3RleHQ+PHRleHQgeD0iNzM1IiB5PSIxMDQiIGZpbGw9IiMxNDJiNDQiIGZvbnQtZmFtaWx5PSJ1aS1tb25vc3BhY2UsIFNGTW9uby1SZWd1bGFyLCBDb25zb2xhcywgbW9ub3NwYWNlIiBmb250LXNpemU9IjE3IiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPmxvY2F0aW9uczwvdGV4dD48dGV4dCB4PSI3MzUiIHk9IjEyMyIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5VYmljYWNpb25lcyBlbiBsYSBzdWN1cnNhbDwvdGV4dD48cmVjdCB4PSIzNCIgeT0iMjE4IiB3aWR0aD0iMjg2IiBoZWlnaHQ9Ijc4IiByeD0iMTIiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjQ5IiB5PSIyMzkiIGZpbGw9IiMyNTU2OGYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj5PUklHRU4gREVMIENPTVBST01JU088L3RleHQ+PHRleHQgeD0iNDkiIHk9IjI2NCIgZmlsbD0iIzE0MmI0NCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+w410ZW0gZGUgb3JkZW4gbyBkZSBhcm1hZG88L3RleHQ+PHRleHQgeD0iNDkiIHk9IjI4MyIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5EZXN0aW5vIGV4Y2x1c2l2bywgbWlzbW8gcHJvZHVjdG88L3RleHQ+PHJlY3QgeD0iMzc1IiB5PSIyMTgiIHdpZHRoPSIyOTAiIGhlaWdodD0iNzgiIHJ4PSIxMiIgZmlsbD0iI2VkZjRmZiIgc3Ryb2tlPSIjOWJiYWRiIi8+PHRleHQgeD0iMzkwIiB5PSIyMzkiIGZpbGw9IiMyNTU2OGYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj5SRVNFUlZBPC90ZXh0Pjx0ZXh0IHg9IjM5MCIgeT0iMjY0IiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0idWktbW9ub3NwYWNlLCBTRk1vbm8tUmVndWxhciwgQ29uc29sYXMsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5zdG9ja19yZXNlcnZhdGlvbnM8L3RleHQ+PHRleHQgeD0iMzkwIiB5PSIyODMiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+QWN0aXZhIMK3IGxpYmVyYWRhIMK3IGNvbnN1bWlkYTwvdGV4dD48cmVjdCB4PSI3MjAiIHk9IjIxOCIgd2lkdGg9IjI4NiIgaGVpZ2h0PSI3OCIgcng9IjEyIiBmaWxsPSIjZWJmOGY1IiBzdHJva2U9IiM3MmI0YTkiLz48dGV4dCB4PSI3MzUiIHk9IjIzOSIgZmlsbD0iIzA3NmQ2MyIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPk1BWU9SIERFIEVYSVNURU5DSUFTPC90ZXh0Pjx0ZXh0IHg9IjczNSIgeT0iMjY0IiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0idWktbW9ub3NwYWNlLCBTRk1vbm8tUmVndWxhciwgQ29uc29sYXMsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5zdG9ja19tb3ZlbWVudHM8L3RleHQ+PHRleHQgeD0iNzM1IiB5PSIyODMiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+RGVsdGEgZsOtc2ljbyBmaXJtYWRvIHkgcmVmZXJlbmNpYTwvdGV4dD48cmVjdCB4PSIzNCIgeT0iMzY1IiB3aWR0aD0iMjg2IiBoZWlnaHQ9Ijc4IiByeD0iMTIiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjQ5IiB5PSIzODYiIGZpbGw9IiMyNTU2OGYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj5WRU5UQSBQT1M8L3RleHQ+PHRleHQgeD0iNDkiIHk9IjQxMSIgZmlsbD0iIzE0MmI0NCIgZm9udC1mYW1pbHk9InVpLW1vbm9zcGFjZSwgU0ZNb25vLVJlZ3VsYXIsIENvbnNvbGFzLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+c2FsZV9pdGVtczwvdGV4dD48dGV4dCB4PSI0OSIgeT0iNDMwIiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPlNhbGlkYSBzb2xvIHBhcmEgbMOtbmVhcyBkZSBwcm9kdWN0bzwvdGV4dD48cmVjdCB4PSIzNzUiIHk9IjM2NSIgd2lkdGg9IjI5MCIgaGVpZ2h0PSI3OCIgcng9IjEyIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSIzOTAiIHk9IjM4NiIgZmlsbD0iIzI1NTY4ZiIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPkVWRU5UT1MgSU5NVVRBQkxFUzwvdGV4dD48dGV4dCB4PSIzOTAiIHk9IjQxMSIgZmlsbD0iIzE0MmI0NCIgZm9udC1mYW1pbHk9InVpLW1vbm9zcGFjZSwgU0ZNb25vLVJlZ3VsYXIsIENvbnNvbGFzLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+c3RvY2tfcmVzZXJ2YXRpb25fZXZlbnRzPC90ZXh0Pjx0ZXh0IHg9IjM5MCIgeT0iNDMwIiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPkNyZWFjacOzbiwgbGliZXJhY2nDs24gbyBjb25zdW1vPC90ZXh0Pgo8cmVjdCB4PSIzMjQuMCIgeT0iNzQiIHdpZHRoPSI0NiIgaGVpZ2h0PSIyMSIgcng9IjciIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjM0NyIgeT0iODgiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4xIDogTjwvdGV4dD48cmVjdCB4PSI2NzAuMCIgeT0iNzQiIHdpZHRoPSI0NiIgaGVpZ2h0PSIyMSIgcng9IjciIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjY5MyIgeT0iODgiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4xIDogTjwvdGV4dD48cmVjdCB4PSI0OTcuMCIgeT0iMTYyIiB3aWR0aD0iNDYiIGhlaWdodD0iMjEiIHJ4PSI3IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSI1MjAiIHk9IjE3NiIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjEgOiBOPC90ZXh0PjxyZWN0IHg9IjcyNy4wIiB5PSIxNDkiIHdpZHRoPSI0NiIgaGVpZ2h0PSIyMSIgcng9IjciIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9Ijc1MCIgeT0iMTYzIiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MSA6IE48L3RleHQ+PHJlY3QgeD0iMzI0LjAiIHk9IjIzMyIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjIxIiByeD0iNyIgZmlsbD0iI2ViZjhmNSIgc3Ryb2tlPSIjNzJiNGE5Ii8+PHRleHQgeD0iMzQ3IiB5PSIyNDciIGZpbGw9IiMwNzZkNjMiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4xIDogTjwvdGV4dD48cmVjdCB4PSI0OTcuMCIgeT0iMzE2IiB3aWR0aD0iNDYiIGhlaWdodD0iMjEiIHJ4PSI3IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSI1MjAiIHk9IjMzMCIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjEgOiBOPC90ZXh0PjxyZWN0IHg9Ijc1NS41IiB5PSIzNjUiIHdpZHRoPSI5NSIgaGVpZ2h0PSIyMSIgcng9IjciIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjgwMyIgeT0iMzc5IiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Q29uc3VtbyAxIDogMTwvdGV4dD48cmVjdCB4PSI0MTcuMCIgeT0iNDU5IiB3aWR0aD0iMjEwIiBoZWlnaHQ9IjIxIiByeD0iNyIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzlkOWU3Ii8+PHRleHQgeD0iNTIyIiB5PSI0NzMiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TYWxpZGEgUE9TIHkgcmV2ZXJzacOzbiB2aW5jdWxhZGE8L3RleHQ+Cjx0ZXh0IHg9IjI5IiB5PSI1MDYiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExLjgiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+UmVzZXJ2YSB5IG1vdmltaWVudG8gbm8gcmVwcmVzZW50YW4gbG8gbWlzbW86IHNvbG8gdW4gbW92aW1pZW50byBtb2RpZmljYSBlbCBzdG9jayBmw61zaWNvLjwvdGV4dD4KPC9zdmc+Cg=="/></div><figcaption>ER de inventario: productos y ubicaciones forman posiciones; un ítem de orden o armado origina una reserva; los eventos de consumo y los ítems de venta originan movimientos físicos.</figcaption></figure>
+<div aria-label="Tabla: 3. Catálogo e inventario" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Tabla</th>
+<th scope="col">Campos y propósito principales</th>
+<th scope="col">Restricciones e índices relevantes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>categories</code>, <code>suppliers</code>, <code>locations</code></td>
+<td>Referencias de categoría, proveedor y ubicación física</td>
+<td>Identificador interno y código/slugs únicos. Inactivación sin eliminar referencias; una ubicación inactiva exige vaciar stock y reservas antes de deshabilitarse.</td>
+</tr>
+<tr>
+<td><code>products</code></td>
+<td>SKU, nombre/descripción, categoría, proveedor principal, ubicación sugerida, costo, precio de lista, impuesto, mínimo, activo</td>
+<td><code>UNIQUE(sku_norm)</code>, FK a los tres catálogos; importes/mínimo no negativos; índices por categoría/estado/nombre. No almacena una cantidad editable en catálogo.</td>
+</tr>
+<tr>
+<td><code>service_catalog</code></td>
+<td>Código, servicio, costo, precio de lista, impuesto, activo</td>
+<td>Código único, validaciones de importes y estados. No genera movimiento de stock.</td>
+</tr>
+<tr>
+<td><code>inventory_balances</code></td>
+<td><code>product_id</code>, <code>location_id</code>, <code>on_hand</code>, <code>reserved</code>, fecha</td>
+<td>PK <code>(product_id,location_id)</code>. FK a producto/ubicación; <code>CHECK(0 &lt;= reserved AND reserved &lt;= on_hand)</code>. Posición bloqueable; disponible derivado, no campo editable.</td>
+</tr>
+<tr>
+<td><code>stock_reservations</code></td>
+<td>Producto, ubicación, ítem objetivo, cantidad inicial/activa/liberada/consumida</td>
+<td>XOR <code>service_order_item_id</code> / <code>pc_project_item_id</code>; FK compuesta que confirma el mismo producto que el ítem, y FK a posición. <code>initial_qty = active_qty + released_qty + consumed_qty</code>; índices por ítem y posición activa.</td>
+</tr>
+<tr>
+<td><code>stock_reservation_events</code></td>
+<td>Reserva, creación/liberación/consumo, cantidad positiva, actor, motivo, fecha</td>
+<td>FK a reserva, índice reserva/ID; inmutable. Expirar es liberar con motivo.</td>
+</tr>
+<tr>
+<td><code>stock_movements</code></td>
+<td>Posición, tipo, <code>delta</code>, motivo, autor, fecha, referencias específicas al origen</td>
+<td>FK a posición; índice <code>(product_id,location_id,occurred_at,id)</code>. Salida POS se vincula al <code>sale_item_id</code>; consumo a <code>reservation_event_id</code> único. Devolución de taller usa <code>returned_from_id</code>; contramovimiento total usa <code>reversal_of_id</code> único, ambos FK al movimiento original y misma posición. Reglas por tipo impiden orígenes contradictorios.</td>
+</tr>
+<tr>
+<td><code>purchase_requests</code>, <code>purchase_request_items</code></td>
+<td>Solicitud, estado, actor y líneas de producto/cantidad</td>
+<td>FK; <code>UNIQUE(request_id,product_id)</code> en ítems. No son un movimiento ni una orden al proveedor.</td>
+</tr>
+<tr>
+<td><code>product_technical_specs</code></td>
+<td>Una ficha por producto: rol de componente, socket, memoria, ranuras/capacidad, formatos, medidas en mm, potencia en W, fuente y fecha de evidencia</td>
+<td>PK/FK <code>product_id</code>; atributos tipados dependientes del rol y <code>NULL</code> para desconocido. Formatos aceptados por gabinete en <code>product_case_formats</code>; cantidades de conectores por tipo/lado en <code>product_spec_connectors</code>.</td>
+</tr>
+<tr>
+<td><code>product_bios_support</code></td>
+<td>Placa + revisión, CPU, versión mínima o conjunto de versiones compatibles, fuente verificable y fecha</td>
+<td>FK a ambos productos; unicidad por placa/revisión/CPU. La lógica valida rol y ordenamiento de versiones según evidencia documentada, no por comparación de texto genérica.</td>
+</tr>
+</tbody>
+</table></div>
+<p>El movimiento de venta debe coincidir con el producto, ubicación y cantidad del ítem (FK compuesta de producto/ubicación y validación de delta en la transacción). El consumo coincide con el evento y con la posición de su reserva. Índices en referencias de origen permiten reconciliar sin escanear el historial. Cantidades parciales de devolución no pueden superar la salida neta original; la V1 no expone devolución parcial de POS desde inventario.</p>
+<h3 id="datos--4-ventas-cobros-y-caja">4. Ventas, cobros y caja</h3>
+<figure class="diagram"><div aria-label="Diagrama desplazable" class="diagram-scroll" role="region" tabindex="0"><img alt="ER de finanzas: una orden, proyecto o venta tiene una cuenta de cobro; cada pago se imputa una vez a la cuenta y pertenece a un turno de caja; arqueos y movimientos manuales pertenecen al turno." decoding="async" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDQwIDUwMCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsbGVkYnk9InRpdGxlIGRlc2MiPgo8dGl0bGUgaWQ9InRpdGxlIj5FUiBkZSBjdWVudGFzLCBwYWdvcyB5IGNhamE8L3RpdGxlPjxkZXNjIGlkPSJkZXNjIj5DdWVudGEgcG9yIG9yZGVuLCBwcm95ZWN0byBvIHZlbnRhLiBDYWRhIHBhZ28gc2UgaW1wdXRhIHVuYSB2ZXogYSBsYSBjdWVudGEgeSBzZSBhc29jaWEgYWwgdHVybm87IGNvcnRlcyB5IG1vdmltaWVudG9zIG1hbnVhbGVzIHZhbiBhbCB0dXJubyBkZSBtYW5lcmEgaW5kZXBlbmRpZW50ZS48L2Rlc2M+CjxkZWZzPjxtYXJrZXIgaWQ9ImFycm93IiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI3LjIiIHJlZlk9IjQuNSIgb3JpZW50PSJhdXRvIiBtYXJrZXJVbml0cz0idXNlclNwYWNlT25Vc2UiPjxwYXRoIGQ9Ik0gMC41IDEgTCA3LjIgNC41IEwgMC41IDgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjQ1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L21hcmtlcj48L2RlZnM+CjxyZWN0IHg9IjAuNSIgeT0iMC41IiB3aWR0aD0iMTAzOSIgaGVpZ2h0PSI0OTkiIHJ4PSIxNiIgZmlsbD0iI2YzZjdmYiIgc3Ryb2tlPSIjYzlkOWU3Ii8+Cjx0ZXh0IHg9IjI5IiB5PSIzMCIgZmlsbD0iIzU4NzE4YSIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEuNSI+TU9ERUxPIEVOVElEQUTigJNSRUxBQ0nDk04gIC8gIENVRU5UQVMsIFBBR09TIFkgVFVSTk9TPC90ZXh0Pgo8cGF0aCBkPSJNIDM1MCA5OCBIIDM5MyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNzY5MWE4IiBzdHJva2Utd2lkdGg9IjEuNjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWRhc2hhcnJheT0iNSA1IiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPjxwYXRoIGQ9Ik0gNjQxIDk4IEggNjk3IiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS42NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPjxwYXRoIGQ9Ik0gNTE3IDE0MCBWIDE4MSBIIDg2MiBWIDIyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNzY5MWE4IiBzdHJva2Utd2lkdGg9IjEuNjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz48cGF0aCBkPSJNIDMxMCAyNjMgSCAzODgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjY1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+PHBhdGggZD0iTSA1MTggMzA0IFYgMzg0IiBmaWxsPSJub25lIiBzdHJva2U9IiM3NjkxYTgiIHN0cm9rZS13aWR0aD0iMS42NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBtYXJrZXItZW5kPSJ1cmwoI2Fycm93KSIvPjxwYXRoIGQ9Ik0gNDQ4IDMwNCBWIDM0MyBIIDE3NyBWIDM4NCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNzY5MWE4IiBzdHJva2Utd2lkdGg9IjEuNjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgbWFya2VyLWVuZD0idXJsKCNhcnJvdykiLz48cGF0aCBkPSJNIDY0OCA0MjQgSCA2ODYgViAyNjMgSCA3MTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzc2OTFhOCIgc3Ryb2tlLXdpZHRoPSIxLjY1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIG1hcmtlci1lbmQ9InVybCgjYXJyb3cpIi8+CjxyZWN0IHg9IjI5IiB5PSI2MCIgd2lkdGg9IjMyMSIgaGVpZ2h0PSI4MCIgcng9IjEyIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSI0NCIgeT0iODEiIGZpbGw9IiMyNTU2OGYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj5PUklHRU4gRVhDTFVZRU5URTwvdGV4dD48dGV4dCB4PSI0NCIgeT0iMTA2IiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5PcmRlbiDCtyBBcm1hZG8gwrcgVmVudGE8L3RleHQ+PHRleHQgeD0iNDQiIHk9IjEyNSIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5VbmEgY3VlbnRhIHBvciBvcmlnZW4gY3VhbmRvIGNvcnJlc3BvbmRlPC90ZXh0PjxyZWN0IHg9IjM5MyIgeT0iNjAiIHdpZHRoPSIyNDgiIGhlaWdodD0iODAiIHJ4PSIxMiIgZmlsbD0iI2ViZjhmNSIgc3Ryb2tlPSIjNzJiNGE5Ii8+PHRleHQgeD0iNDA4IiB5PSI4MSIgZmlsbD0iIzA3NmQ2MyIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPlVOIFNPTE8gU0FMRE8gUE9SIE9SSUdFTjwvdGV4dD48dGV4dCB4PSI0MDgiIHk9IjEwNiIgZmlsbD0iIzE0MmI0NCIgZm9udC1mYW1pbHk9InVpLW1vbm9zcGFjZSwgU0ZNb25vLVJlZ3VsYXIsIENvbnNvbGFzLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+cmVjZWl2YWJsZXM8L3RleHQ+PHRleHQgeD0iNDA4IiB5PSIxMjUiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+Q3VlbnRhIHkgbW9uZWRhPC90ZXh0PjxyZWN0IHg9IjY5NyIgeT0iNjAiIHdpZHRoPSIzMTUiIGhlaWdodD0iODAiIHJ4PSIxMiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzlkOWU3Ii8+PHRleHQgeD0iNzEyIiB5PSI4MSIgZmlsbD0iIzI1NTY4ZiIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPlZFUlNJT05FUyBERSBMQSBCQVNFPC90ZXh0Pjx0ZXh0IHg9IjcxMiIgeT0iMTA2IiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0idWktbW9ub3NwYWNlLCBTRk1vbm8tUmVndWxhciwgQ29uc29sYXMsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5yZWNlaXZhYmxlX3Rlcm1zPC90ZXh0Pjx0ZXh0IHg9IjcxMiIgeT0iMTI1IiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPkVzdGltYWNpw7NuLCBiYXNlIGZpcm1lIG8gYW51bGFjacOzbjwvdGV4dD48cmVjdCB4PSIyOSIgeT0iMjI0IiB3aWR0aD0iMjgxIiBoZWlnaHQ9IjgwIiByeD0iMTIiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjQ0IiB5PSIyNDUiIGZpbGw9IiMyNTU2OGYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj5DQUpBUyBJREVOVElGSUNBREFTPC90ZXh0Pjx0ZXh0IHg9IjQ0IiB5PSIyNzAiIGZpbGw9IiMxNDJiNDQiIGZvbnQtZmFtaWx5PSJ1aS1tb25vc3BhY2UsIFNGTW9uby1SZWd1bGFyLCBDb25zb2xhcywgbW9ub3NwYWNlIiBmb250LXNpemU9IjE3IiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPmNhc2hfcmVnaXN0ZXJzPC90ZXh0Pjx0ZXh0IHg9IjQ0IiB5PSIyODkiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+VW5hIGNhamEsIHR1cm5vcyBoaXN0w7NyaWNvczwvdGV4dD48cmVjdCB4PSIzODgiIHk9IjIyNCIgd2lkdGg9IjI2MCIgaGVpZ2h0PSI4MCIgcng9IjEyIiBmaWxsPSIjZWRmNGZmIiBzdHJva2U9IiM5YmJhZGIiLz48dGV4dCB4PSI0MDMiIHk9IjI0NSIgZmlsbD0iIzI1NTY4ZiIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPlRVUk5PIERFIENBSkE8L3RleHQ+PHRleHQgeD0iNDAzIiB5PSIyNzAiIGZpbGw9IiMxNDJiNDQiIGZvbnQtZmFtaWx5PSJ1aS1tb25vc3BhY2UsIFNGTW9uby1SZWd1bGFyLCBDb25zb2xhcywgbW9ub3NwYWNlIiBmb250LXNpemU9IjE3IiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPmNhc2hfc2Vzc2lvbnM8L3RleHQ+PHRleHQgeD0iNDAzIiB5PSIyODkiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+QXBlcnR1cmEsIHJlc3BvbnNhYmxlIHkgY2llcnJlPC90ZXh0PjxyZWN0IHg9IjcxNiIgeT0iMjI0IiB3aWR0aD0iMjk2IiBoZWlnaHQ9IjgwIiByeD0iMTIiIGZpbGw9IiNlYmY4ZjUiIHN0cm9rZT0iIzcyYjRhOSIvPjx0ZXh0IHg9IjczMSIgeT0iMjQ1IiBmaWxsPSIjMDc2ZDYzIiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0IiBsZXR0ZXItc3BhY2luZz0iMSI+RU5MQUNFIENPTlRBQkxFPC90ZXh0Pjx0ZXh0IHg9IjczMSIgeT0iMjcwIiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0idWktbW9ub3NwYWNlLCBTRk1vbm8tUmVndWxhciwgQ29uc29sYXMsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5wYXltZW50X2FsbG9jYXRpb25zPC90ZXh0Pjx0ZXh0IHg9IjczMSIgeT0iMjg5IiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPlVuYSBpbXB1dGFjacOzbiBwb3IgcGFnbyBvIGRldm9sdWNpw7NuPC90ZXh0PjxyZWN0IHg9IjI5IiB5PSIzODQiIHdpZHRoPSIyOTYiIGhlaWdodD0iODAiIHJ4PSIxMiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzlkOWU3Ii8+PHRleHQgeD0iNDQiIHk9IjQwNSIgZmlsbD0iIzI1NTY4ZiIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPkNBSkEgT1BFUkFUSVZBPC90ZXh0Pjx0ZXh0IHg9IjQ0IiB5PSI0MzAiIGZpbGw9IiMxNDJiNDQiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE3IiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPk1vdmltaWVudG9zIHkgYXJxdWVvczwvdGV4dD48dGV4dCB4PSI0NCIgeT0iNDQ5IiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPk1hbnVhbGVzIHkgY29ydGVzOyBubyBkdXBsaWNhbiBwYWdvczwvdGV4dD48cmVjdCB4PSIzODgiIHk9IjM4NCIgd2lkdGg9IjI2MCIgaGVpZ2h0PSI4MCIgcng9IjEyIiBmaWxsPSIjZWRmNGZmIiBzdHJva2U9IiM5YmJhZGIiLz48dGV4dCB4PSI0MDMiIHk9IjQwNSIgZmlsbD0iIzI1NTY4ZiIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJzdGFydCIgbGV0dGVyLXNwYWNpbmc9IjEiPk9SSUdFTiBERUwgRkxVSk8gTU9ORVRBUklPPC90ZXh0Pjx0ZXh0IHg9IjQwMyIgeT0iNDMwIiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0idWktbW9ub3NwYWNlLCBTRk1vbm8tUmVndWxhciwgQ29uc29sYXMsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5wYXltZW50czwvdGV4dD48dGV4dCB4PSI0MDMiIHk9IjQ0OSIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5Db2JybyBvIGRldm9sdWNpw7NuIMK3IG1lZGlvIMK3IGltcG9ydGU8L3RleHQ+PHJlY3QgeD0iNzE2IiB5PSIzODQiIHdpZHRoPSIyOTYiIGhlaWdodD0iODAiIHJ4PSIxMiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzlkOWU3Ii8+PHRleHQgeD0iNzMxIiB5PSI0MDUiIGZpbGw9IiMyNTU2OGYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGxldHRlci1zcGFjaW5nPSIxIj5SRUdMQSBERSBDT05DSUxJQUNJw5NOPC90ZXh0Pjx0ZXh0IHg9IjczMSIgeT0iNDMwIiBmaWxsPSIjMTQyYjQ0IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5FZmVjdGl2byBuZXRvIGVuIGNhamE8L3RleHQ+PHRleHQgeD0iNzMxIiB5PSI0NDkiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJzdGFydCI+RMOpYml0byB5IHRyYW5zZmVyZW5jaWEgc2UgaW5mb3JtYW4gYXBhcnRlPC90ZXh0Pgo8cmVjdCB4PSIzNTQuMCIgeT0iNzYiIHdpZHRoPSIzNCIgaGVpZ2h0PSIyMSIgcng9IjciIGZpbGw9IiNlYmY4ZjUiIHN0cm9rZT0iIzcyYjRhOSIvPjx0ZXh0IHg9IjM3MSIgeT0iOTAiIGZpbGw9IiMwNzZkNjMiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5YT1I8L3RleHQ+PHJlY3QgeD0iNjQ2LjAiIHk9Ijc0IiB3aWR0aD0iNDYiIGhlaWdodD0iMjEiIHJ4PSI3IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSI2NjkiIHk9Ijg4IiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MSA6IE48L3RleHQ+PHJlY3QgeD0iNzA5LjAiIHk9IjE2OCIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjIxIiByeD0iNyIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzlkOWU3Ii8+PHRleHQgeD0iNzMyIiB5PSIxODIiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4xIDogTjwvdGV4dD48cmVjdCB4PSIzMjUuMCIgeT0iMjQwIiB3aWR0aD0iNDYiIGhlaWdodD0iMjEiIHJ4PSI3IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjOWQ5ZTciLz48dGV4dCB4PSIzNDgiIHk9IjI1NCIgZmlsbD0iIzQ1NWY3OCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjEgOiBOPC90ZXh0PjxyZWN0IHg9IjQ5NS4wIiB5PSIzMjkiIHdpZHRoPSI0NiIgaGVpZ2h0PSIyMSIgcng9IjciIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M5ZDllNyIvPjx0ZXh0IHg9IjUxOCIgeT0iMzQzIiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MSA6IE48L3RleHQ+PHJlY3QgeD0iMjY3LjAiIHk9IjMzMCIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjIxIiByeD0iNyIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzlkOWU3Ii8+PHRleHQgeD0iMjkwIiB5PSIzNDQiIGZpbGw9IiM0NTVmNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4xIDogTjwvdGV4dD48cmVjdCB4PSI2NjMuMCIgeT0iMzI4IiB3aWR0aD0iNDYiIGhlaWdodD0iMjEiIHJ4PSI3IiBmaWxsPSIjZWJmOGY1IiBzdHJva2U9IiM3MmI0YTkiLz48dGV4dCB4PSI2ODYiIHk9IjM0MiIgZmlsbD0iIzA3NmQ2MyIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjEgOiAxPC90ZXh0Pgo8dGV4dCB4PSIyOSIgeT0iNDgyIiBmaWxsPSIjNDU1Zjc4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMS44IiBmb250LXdlaWdodD0iNDAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPkxvcyBwYWdvcyBubyBnZW5lcmFuIGZpbGFzIGVzcGVqbyBlbiBtb3ZpbWllbnRvcyBtYW51YWxlcy4gRWwgYXJxdWVvIHRvbWEgYW1ib3Mgb3LDrWdlbmVzIHNpbiBkdXBsaWNhcmxvcy48L3RleHQ+Cjwvc3ZnPgo="/></div><figcaption>ER de finanzas: una orden, proyecto o venta tiene una cuenta de cobro; cada pago se imputa una vez a la cuenta y pertenece a un turno de caja; arqueos y movimientos manuales pertenecen al turno.</figcaption></figure>
+<div aria-label="Tabla: 4. Ventas, cobros y caja" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Tabla</th>
+<th scope="col">Campos y propósito principales</th>
+<th scope="col">Restricciones e índices relevantes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sales</code>, <code>sale_items</code></td>
+<td>Venta confirmada/anulada, turno de venta, actor, cliente opcional, moneda, totales y fechas. Detalles con producto/servicio, cantidad, unitario, costo interno, impuesto, descuento y total histórico.</td>
+<td>FK cliente/turno/actor. Ítems XOR producto/servicio; posición obligatoria para producto, ninguna para servicio. Índices venta por fecha/estado/cliente y de ítems por venta; clave candidata del ítem con producto y ubicación.</td>
+</tr>
+<tr>
+<td><code>receivables</code></td>
+<td>Cuenta para un único <code>service_order_id</code>, <code>pc_project_id</code> o <code>sale_id</code>; moneda y escala</td>
+<td>Tres FK explícitas, XOR, <code>UNIQUE</code> por origen y candidato <code>(id,currency_code,currency_scale)</code>. La cuenta no guarda un «pagado» editable.</td>
+</tr>
+<tr>
+<td><code>receivable_terms</code></td>
+<td>Historial de base de cobro: versión, <code>estimate</code> / <code>firm</code> / <code>void</code>, importe, presupuesto opcional y actor/motivo</td>
+<td><code>UNIQUE(receivable_id,version)</code>, FK a cuenta y a presupuesto si aplica. Revisiones consecutivas bajo bloqueo de cuenta. La aplicación verifica que la cotización pertenezca al mismo origen y conserve la moneda y su escala.</td>
+</tr>
+<tr>
+<td><code>payments</code></td>
+<td><code>cash_session_id</code>, actor, método, <code>capture</code> o <code>refund</code>, importe positivo, fecha, referencia no sensible; recibido/cambio para efectivo y <code>refund_of_id</code> para devoluciones</td>
+<td>FK a turno con moneda/escala y auto-FK a pago original. Índices <code>(cash_session_id,method,occurred_at,id)</code>, <code>refund_of_id</code>. Devoluciones validan mismo método, cuenta y moneda, con tope acumulado.</td>
+</tr>
+<tr>
+<td><code>payment_allocations</code></td>
+<td>Imputación completa de cada pago (o devolución) a una cuenta en V1</td>
+<td>PK <code>payment_id</code> para impedir doble imputación; FK compuestas desde pago y cuenta con misma moneda/escala. Índice <code>(receivable_id,payment_id)</code>; el importe viene de <code>payments</code>, no se duplica.</td>
+</tr>
+<tr>
+<td><code>cash_registers</code></td>
+<td>Código, nombre, estado y referencia operativa de la caja</td>
+<td><code>UNIQUE(code)</code>. Una caja con turno activo no se deshabilita.</td>
+</tr>
+<tr>
+<td><code>cash_sessions</code></td>
+<td>Caja, moneda/escala, responsable, actor de apertura/cierre, saldo inicial, fechas, estado</td>
+<td>FK a caja/usuarios. Columnas generadas anulables <code>open_register_id</code> y <code>open_operator_id</code>, únicas solo cuando <code>closed_at IS NULL</code> (varios <code>NULL</code> permitidos); índice de historial por caja y fecha.</td>
+</tr>
+<tr>
+<td><code>cash_movements</code></td>
+<td>Solo ingresos/retiros manuales; turno, importe positivo, dirección, motivo, autor y fecha</td>
+<td>FK turno/actor, índice turno/fecha. Sin filas espejo de pagos ni de apertura.</td>
+</tr>
+<tr>
+<td><code>cash_counts</code></td>
+<td>Arqueo parcial o final; totales por método separados, esperado, contado, diferencia, observaciones, actor y corte UTC</td>
+<td>FK a turno/actor. Clave generada única para el arqueo final por turno; permitir varios parciales. Corte y cambio de estado final se guardan en la misma transacción.</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>receivable_terms</code> determina la base vigente por última versión y <code>payments</code> con su imputación determinan el pagado neto. Un presupuesto histórico no añade otra deuda. Una venta confirmada tiene una cuenta firme y una o más imputaciones que la liquidan exactamente. Una orden confirmada puede no tener base firme todavía. Los cobros se reflejan en caja por la relación al turno, no por copias contables.</p>
+<h3 id="datos--5-operacion-trazabilidad-y-soporte">5. Operación, trazabilidad y soporte</h3>
+<div aria-label="Tabla: 5. Operación, trazabilidad y soporte" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Tabla</th>
+<th scope="col">Campos y propósito principales</th>
+<th scope="col">Restricciones e índices relevantes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>appointments</code></td>
+<td>Cliente, orden opcional, responsable, tipo recepción/entrega/llamada, inicio, estado y notas</td>
+<td>FK cliente y FK <code>(service_order_id,customer_id)</code> candidata de órdenes. Índices <code>(scheduled_at,status,id)</code> y <code>(assigned_user_id,scheduled_at)</code>.</td>
+</tr>
+<tr>
+<td><code>audit_logs</code></td>
+<td>Actor, acción, fecha UTC, identificador de solicitud, cambios seleccionados, objetivo</td>
+<td>FK a actor; columnas objetivo tipadas (<code>order_id</code>, <code>project_id</code>, <code>quote_id</code>, <code>sale_id</code>, <code>payment_id</code>, <code>reservation_id</code>, <code>movement_id</code>, <code>cash_session_id</code>, <code>subject_user_id</code>, <code>role_id</code>, <code>product_id</code>, <code>customer_id</code>, <code>device_id</code>, <code>appointment_id</code>, <code>purchase_request_id</code>, <code>setting_id</code>), exactamente una por <code>CHECK</code>. Eventos hijos apuntan a la raíz del caso cuando basta (p. ej. acceso temporal → orden); validación de acción/objetivo en el emisor. Índices actor/fecha, acción/fecha y destino/fecha para consultas principales.</td>
+</tr>
+<tr>
+<td><code>settings</code></td>
+<td>Parámetros tipados y con allowlist: zona, moneda y escala inicial, IVA, reglas operativas y referencias a políticas</td>
+<td>Clave única. Variables secretas no pertenecen a esta tabla. Cambios de política congelados por versión en documentos nuevos.</td>
+</tr>
+<tr>
+<td><code>idempotency_keys</code></td>
+<td>Actor, comando, clave, huella de la solicitud, respuesta mínima, código HTTP y fecha</td>
+<td><code>UNIQUE(actor_id, command, client_key)</code>; nunca guarda contraseñas ni cuerpos crudos. Huella de solicitud con HMAC. Los datos de replay no son referencias contables.</td>
+</tr>
+<tr>
+<td><code>csv_import_batches</code>, <code>auth_attempt_limits</code>, <code>schema_migrations</code></td>
+<td>Lote temporal/resultado de validación; contadores de acceso con expiración; historial de migraciones y checksum</td>
+<td>Vencimiento/propiedad del lote; claves de limitación no contienen usuario/correo crudo; versión única en migraciones.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Consultas y consistencia.</strong> Ordenar listas por fecha o nombre más ID como desempate; combinar índices con el filtro de alcance por rol. SKU, números de documento y teléfonos usan búsquedas normalizadas, y las búsquedas por persona/equipo ofrecen prefijos de campos o tokens (índice de texto si el volumen lo justifica). Rangos de fecha se calculan como límites UTC y se pasan a SQL para preservar los índices. Reconciliar posiciones contra el mayor de movimientos y reservas activas; conciliar pagos → imputaciones → turno antes de declarar un corte válido. Las correcciones no borran historia.</p>
+<p>Ver <a href="#reglas">Reglas de negocio</a> para el orden de bloqueos, redondeos y transiciones. Los diagramas muestran relaciones principales; las restricciones completas se especifican en el diccionario.</p>
+</div>
+<a class="to-top" href="#inicio">↑ Volver al índice</a>
+</article>
+<article class="chapter" id="reglas" aria-labelledby="reglas-title">
+<div class="chapter-head"><span class="unit" aria-hidden="true">03</span><div><div class="chapter-kicker">CAPÍTULO 03 / 06</div><h2 id="reglas-title">Reglas de negocio</h2><p>De la recepción al cobro, con reglas de stock, IVA y conciliación.</p></div></div>
+<nav class="subindex" aria-label="En este capítulo"><a href="#reglas--1-clientes-recepcion-y-entrega">Clientes, recepción y entrega</a><a href="#reglas--2-inventario-y-reservas">Inventario y reservas</a><a href="#reglas--3-armados-presupuesto-y-compatibilidad">Armados, presupuesto y compatibilidad</a><a href="#reglas--4-dinero-descuentos-e-iva">Dinero, descuentos e IVA</a><a href="#reglas--5-cuenta-de-cobro-anticipos-y-devoluciones">Cuenta de cobro, anticipos y devoluciones</a><a href="#reglas--6-venta-y-caja">Venta y caja</a><a href="#reglas--7-atomicidad-concurrencia-y-reintentos">Atomicidad, concurrencia y reintentos</a><a href="#reglas--8-indicadores-agenda-y-auditoria">Indicadores, agenda y auditoría</a></nav>
+<div class="prose">
+<h3 id="reglas--1-clientes-recepcion-y-entrega">1. Clientes, recepción y entrega</h3>
+<ul>
+<li>Validar RUT chileno solo al seleccionar documento RUT: normalizar puntos, guion y <code>K</code>, y validar dígito con módulo 11. No verifica identidad oficial. Admitir otros tipos y emisores sin ese algoritmo. Normalizar teléfonos válidos a formato internacional, con <code>+56</code> como prefijo sugerido y sin rechazar números extranjeros por defecto. Bloquear alta de documento normalizado idéntico en el mismo tipo/emisor; alertar similitud por teléfono, correo o nombre sin fusionar automáticamente.</li>
+<li>El asistente guarda un borrador incompleto, visible para su autor o administración. Crear un cliente o un equipo desde el asistente es un alta explícita y validada, no una consecuencia silenciosa de guardar el borrador. Fotos y accesorios pueden prepararse con el ID del borrador; sin movimientos, reservas ni pagos.</li>
+<li>Confirmar valida equipo/propietario, falla, conformidad con política versionada, autorización de diagnóstico y accesorios revisados. Registra firma si la política del tipo de recepción la exige. Fija el comprobante, crea la cuenta y el primer evento de estado. Con anticipo, exige estimación y conformidad registradas y turno válido, y todo se confirma junto. La estimación se calcula con las líneas registradas o se valida como total preliminar explícito; una vez aceptada queda como revisión <code>estimate</code>. Sin anticipo, no exige una caja abierta. La credencial opcional se cifra al confirmar; si se abandona el asistente, se vuelve a ingresar y no se recupera desde el borrador.</li>
+<li>Al asignar técnico, comprobar que esté activo y habilitado. Registrar reasignación y retirar acceso al anterior en solicitudes posteriores. En órdenes confirmadas no se reescribe el comprobante de ingreso; nuevos hallazgos o correcciones quedan como eventos o notas con motivo.</li>
+</ul>
+<h4 id="reglas--maquina-de-estados-de-ordenes">Máquina de estados de órdenes</h4>
+<p>Solo se permiten las flechas y causas de esta tabla. Cotizaciones, aprobaciones, consumos y cobros se registran con comandos propios, no con <code>PATCH state</code>.</p>
+<div aria-label="Tabla: Máquina de estados de órdenes" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Desde</th>
+<th scope="col">Hacia</th>
+<th scope="col">Guarda mínima</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>borrador</code></td>
+<td><code>recibido</code></td>
+<td>Comando de recepción; datos, conformidad y anticipo válido si se declara.</td>
+</tr>
+<tr>
+<td><code>recibido</code></td>
+<td><code>diagnostico</code></td>
+<td>Técnico asignado autorizado; notificar cambio en historial, no por mensajería externa.</td>
+</tr>
+<tr>
+<td><code>diagnostico</code></td>
+<td><code>presupuesto_enviado</code>, <code>espera_repuesto</code>, <code>en_reparacion</code></td>
+<td>Envío externo ya registrado para la primera opción; diagnóstico y autorización de trabajo vigente para iniciar la reparación. Esperar repuesto puede documentarse sin forzar una compra.</td>
+</tr>
+<tr>
+<td><code>presupuesto_enviado</code></td>
+<td><code>espera_aprobacion</code>, <code>diagnostico</code>, <code>espera_repuesto</code>, <code>en_reparacion</code></td>
+<td>Confirmar que se espera decisión, reevaluar por motivo, o avanzar tras aprobación.</td>
+</tr>
+<tr>
+<td><code>espera_aprobacion</code></td>
+<td><code>diagnostico</code>, <code>espera_repuesto</code>, <code>en_reparacion</code></td>
+<td>Nuevo diagnóstico si se rechaza o revisa; aprobación vigente para avanzar.</td>
+</tr>
+<tr>
+<td><code>espera_repuesto</code></td>
+<td><code>diagnostico</code>, <code>en_reparacion</code></td>
+<td>Motivo de retorno; disponibilidad verificable y trabajo autorizado antes de reparar.</td>
+</tr>
+<tr>
+<td><code>en_reparacion</code></td>
+<td><code>diagnostico</code>, <code>espera_repuesto</code>, <code>listo_entrega</code></td>
+<td>Motivo en retroceso; para estar lista, tareas obligatorias completadas, repuestos conciliados y pruebas registradas.</td>
+</tr>
+<tr>
+<td><code>listo_entrega</code></td>
+<td><code>en_reparacion</code>, <code>entregado</code></td>
+<td>Reapertura técnica con motivo; entrega registra fecha real, responsable, constancia y verifica saldo firme liquidado y sin reservas activas.</td>
+</tr>
+<tr>
+<td>Confirmada no terminal</td>
+<td><code>cancelado</code></td>
+<td>Administración, motivo, pagos netos en cero y liberación de reservas. El consumo ya ejecutado no se deshace sin devolución física registrada.</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>entregado</code> y <code>cancelado</code> son terminales. La entrega elimina el acceso temporal; la cancelación también. El descarte de un borrador no es una cancelación comercial. Trabajos sin cargo (p. ej. garantía) usan una base firme explícita de cero y su conformidad; no se inventa un pago. La entrega se bloquea también si hay exceso de lo cobrado por resolver.</p>
+<h3 id="reglas--2-inventario-y-reservas">2. Inventario y reservas</h3>
+<p><strong>Disponible = físico − reservado activo.</strong> La alerta de reposición usa disponibilidad; el historial de stock físico se obtiene de los movimientos. Una entrada o ajuste requiere motivo y usuario; ningún formulario modifica el saldo directamente.</p>
+<div aria-label="Tabla: 2. Inventario y reservas" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Operación</th>
+<th scope="col" style="text-align:right">Físico</th>
+<th scope="col" style="text-align:right">Reservado</th>
+<th scope="col">Validación principal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Entrada / devolución física</td>
+<td style="text-align:right"><code>+q</code></td>
+<td style="text-align:right"><code>0</code></td>
+<td>Una devolución referencia la salida original y respeta su cantidad pendiente de devolver.</td>
+</tr>
+<tr>
+<td>Reserva</td>
+<td style="text-align:right"><code>0</code></td>
+<td style="text-align:right"><code>+q</code></td>
+<td><code>q ≤ disponible</code>, ítem/ubicación correctos, y la cantidad faltante del ítem no se excede.</td>
+</tr>
+<tr>
+<td>Liberación / expiración</td>
+<td style="text-align:right"><code>0</code></td>
+<td style="text-align:right"><code>−q</code></td>
+<td><code>q ≤ cantidad activa</code>, conserva el evento y motivo.</td>
+</tr>
+<tr>
+<td>Consumo de reserva</td>
+<td style="text-align:right"><code>−q</code></td>
+<td style="text-align:right"><code>−q</code></td>
+<td><code>q ≤ cantidad activa</code>; un movimiento por evento, solo para trabajo en curso ya autorizado.</td>
+</tr>
+<tr>
+<td>Venta POS</td>
+<td style="text-align:right"><code>−q</code></td>
+<td style="text-align:right"><code>0</code></td>
+<td><code>q ≤ disponible</code>; no usa reservas de taller.</td>
+</tr>
+<tr>
+<td>Ajuste</td>
+<td style="text-align:right"><code>±q</code></td>
+<td style="text-align:right"><code>0</code></td>
+<td>Motivo y permiso; físico nunca menor que reservado.</td>
+</tr>
+<tr>
+<td>Reversión POS</td>
+<td style="text-align:right"><code>+q</code></td>
+<td style="text-align:right"><code>0</code></td>
+<td>Compensa una salida por venta una sola vez, desde el comando de anulación.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Ejemplo comprobable: con 5 unidades, reservar 3 deja 5 físicas, 3 reservadas y 2 disponibles. Vender 2 deja 3/3/0. Consumir 2 reservadas deja 1/1/0; liberar la restante deja 1/0/1. Consumir no rebaja la disponibilidad por segunda vez. La cantidad activa, liberada y consumida se conserva por reserva; después de cada evento se actualiza la posición y se escribe el historial en una transacción.</p>
+<p>Las reservas entran solo en órdenes confirmadas no terminales y proyectos aprobados/en curso. No se pueden quitar ítems ni reducir cantidades por debajo de lo reservado más lo consumido neto. En cancelación se liberan compromisos activos; si se recupera un componente realmente consumido, se devuelve con referencia al movimiento, sin reactivar su reserva. Las solicitudes internas de compra registran cantidades objetivo y su estado, no alteran existencias. En CSV se previsualizan errores por fila, se revalida al confirmar y se importa como lote atómico; los saldos nunca se importan como columnas editables.</p>
+<h3 id="reglas--3-armados-presupuesto-y-compatibilidad">3. Armados, presupuesto y compatibilidad</h3>
+<ul>
+<li>Flujo normal: <code>solicitud → cotizacion → espera_cliente → aprobado → en_armado → pruebas → listo_entrega → entregado</code>. Registrar emisión y envío manual lleva a <code>espera_cliente</code>; aprobación válida lleva a <code>aprobado</code>. Rechazo o revisión devuelve a <code>cotizacion</code>; <code>pruebas → en_armado</code> y <code>listo_entrega → pruebas</code> son retrocesos técnicos con motivo. Volver de un proyecto aprobado/en curso a cotización requiere un cambio de alcance explícito, conciliación de reservas afectadas y no borra cobros, consumos o conformidades previas. Administración puede cancelar desde un estado no terminal con las mismas guardas financieras y de reserva; <code>archived_at</code> solo después de entrega o cancelación, sin deuda/compromisos.</li>
+<li>Toda cotización nace <code>draft</code>; al emitir/registrar envío se congela y pasa a <code>sent</code>. Puede pasar a <code>approved</code>, <code>rejected</code>, <code>expired</code> o <code>superseded</code>. El servicio rechaza aprobación vencida o de una revisión desplazada aunque el proceso de expiración no haya corrido todavía. Aprobar exige registrar canal, fecha, actor y evidencia o referencia revisada, sin que el sistema simule el contacto. Validar que el destino no esté en estado terminal y que la revisión corresponda al alcance que se va a ejecutar. Si cambian componentes, cantidades o servicios de una versión emitida, se necesita una nueva revisión y no se autoriza el alcance cambiado con la anterior. Solo la última aprobación económicamente vigente modifica la cuenta. Emitir una nueva revisión desplaza la anterior pendiente, no borra una aprobación histórica ni cambia el saldo hasta la nueva aprobación.</li>
+<li>Duplicar arma un nuevo proyecto en solicitud con copia reutilizable de componentes y mano de obra; recalcular precios y compatibilidad. No copiar aprobación, pagos, reservas, movimientos, pruebas ni avance de estado. Generar presupuesto imprimible desde la revisión fija; no mostrar costos internos al cliente.</li>
+</ul>
+<div aria-label="Tabla: 3. Armados, presupuesto y compatibilidad" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Chequeo</th>
+<th scope="col">Datos mínimos y señal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU / placa</td>
+<td>Tipo de socket normalizado en ambos lados; además evidencia del modelo/revisión y soporte de CPU para declarar la verificación de BIOS.</td>
+</tr>
+<tr>
+<td>Memoria</td>
+<td>Generación, módulos por kit, cantidad de ranuras usadas, máximo total y por ranura cuando aplique.</td>
+</tr>
+<tr>
+<td>Gabinete / placa</td>
+<td>Formato real de placa dentro de los formatos admitidos por el gabinete.</td>
+</tr>
+<tr>
+<td>GPU / espacio</td>
+<td>Longitud en mm y holgura real de la configuración (p. ej. radiador); si la variante no se conoce, no aprobar el chequeo por omisión.</td>
+</tr>
+<tr>
+<td>Potencia y conectores</td>
+<td>Suma estimada verificable más factor de margen configurable (propuesto 1,25) comparada con la potencia nominal; cotejar tipos/cantidad de conectores de fuente, placa y GPU. No es medición de consumo real.</td>
+</tr>
+<tr>
+<td>BIOS en un armado o mejora</td>
+<td>Fuente verificable para revisión específica y versión real o versión con la que se entregará tras actualización documentada. Sin evidencia suficiente: requiere verificación.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Resultado por regla y consolidado: <strong>incompatible</strong> si hay contradicción comprobada; <strong>requiere verificación</strong> si falta cualquier dato necesario o las fuentes no son concluyentes; <strong>compatible según datos disponibles</strong> solo si pasan todas las reglas aplicables. Registrar reglas, entradas, fuentes y fecha usadas para aprobar, e invalidar la evaluación si cambia el armado. La incompatibilidad conocida bloquea aprobación; una incertidumbre requiere verificación documentada por un técnico antes de aprobación o avance, sin cambiar automáticamente la etiqueta a «compatible» si todavía faltan datos del catálogo. En una mejora, los componentes ya instalados son parte de la evaluación.</p>
+<h3 id="reglas--4-dinero-descuentos-e-iva">4. Dinero, descuentos e IVA</h3>
+<p>Configuración inicial: Chile, <code>CLP</code>, escala 0, <code>America/Santiago</code>, IVA <code>1900</code> puntos básicos (19 %) y precios de lista al público <strong>con IVA incluido</strong>. Modo y tasas por tipo de catálogo se congelan por línea; IVA exento usa tasa cero solo si está configurado y autorizado. Antes de guardar, representar montos como cadenas de unidades menores y operar con enteros de precisión arbitraria (BCMath), nunca <code>float</code>. Rechazar montos fuera de escala/rango; redondear a la unidad menor, mitad hacia arriba, solo en los pasos especificados. La moneda base y escala se pueden configurar antes de registrar historia monetaria; una conversión posterior requiere una migración comercial explícita, sin reescribir documentos.</p>
+<ol>
+<li>Calcular los extendidos <code>unitario × cantidad</code>. El descuento global autorizado como monto (o porcentaje convertido a monto una vez) no puede superar la suma de líneas. El permiso y el motivo los valida el servidor; no se confía en un total editable. En V1, la confirmación que aplica un descuento se realiza con la sesión del administrador; si el turno es de otra persona, el administrador interviene con motivo explícito. No se comparten credenciales.</li>
+<li>Prorratear el descuento en las líneas por sus extendidos: truncar a unidades menores y asignar sobrantes según restos mayores con desempate por orden estable de línea. La suma distribuida es igual al descuento. Si todas las líneas valen cero, solo se permite descuento cero y se omite el prorrateo.</li>
+<li>En precios con IVA incluido, <code>total_línea = extendido − descuento_línea</code>, <code>neto = redondear(total_línea × 10000 / (10000 + tasa_bps))</code>, <code>IVA = total_línea − neto</code>. Si una instalación elige precios netos, primero descontar sobre el neto y calcular <code>IVA = redondear(neto × tasa_bps / 10000)</code> por línea. No mezclar ambos modos en un mismo documento V1.</li>
+<li>Sumar los netos, impuestos y totales de línea. Persistir unitarios, tasas, costo y resultados; aplicar el mismo motor a cotización y POS. Una reversión usa importes originales exactos, no redondea nuevamente el documento a tasas del día.</li>
+</ol>
+<p>Ejemplo CLP con IVA incluido: dos líneas de $11.900 y $23.800, descuento autorizado de $3.570. Se asignan $1.190 y $2.380. Neto total $27.000, IVA $5.130 y total $32.130. Si el costo interno neto de impuestos recuperables es $18.000, la utilidad bruta es $9.000. <strong>Margen bruto</strong> = utilidad ÷ neto de venta = 33,33 %; <strong>recargo</strong> = utilidad ÷ costo = 50 %. Si el denominador no es positivo, el indicador no aplica.</p>
+<h3 id="reglas--5-cuenta-de-cobro-anticipos-y-devoluciones">5. Cuenta de cobro, anticipos y devoluciones</h3>
+<ol>
+<li>Una venta POS tiene una base firme. Una orden confirmada tiene una cuenta desde la recepción; puede tener una estimación aceptada o ninguna base hasta la aprobación. Un armado abre cuenta cuando su cotización se aprueba. El POS permite buscar y cobrar una cuenta de orden/armado sin registrar otra venta o salida de productos.</li>
+<li>El anticipo se imputa una vez a esa cuenta. En una orden aún provisional se permite hasta el monto preliminar explícito aceptado; se presenta como anticipo y, si aplica, con saldo estimado, no como deuda firme. Los pagos sobre una base firme no pueden exceder el saldo al confirmar. Las revisiones pueden producir un excedente si bajan el total luego de un anticipo; se muestra «a favor» y se resuelve con devolución autorizada, no con descuento ficticio.</li>
+<li><code>pagado_neto = cobros − devoluciones</code>; <code>saldo_pendiente = max(base_firme − pagado_neto, 0)</code> y <code>a_favor = max(pagado_neto − base_firme, 0)</code> si hay base firme. Con anticipo de $10.000 y aprobación por $32.130, el saldo es $22.130; los $10.000 ya están en el turno original y no se repostean.</li>
+<li>Cada medio de un cobro crea un pago e imputación completa. Reembolso con permiso, turno abierto, importe positivo, motivo, mismo medio y referencia explícita al cobro original; no superar el remanente reembolsable. Débito/transferencia reflejan un movimiento ya ejecutado externamente, con referencia, no una instrucción que el sistema envía. En V1 los ajustes financieros de orden/armado se resuelven antes de la entrega o cancelación; no se reabre un estado terminal para devolver. Una orden/armado con fondos no se cancela hasta saldar las devoluciones; la cancelación vuelve su base vigente a cero sin alterar el historial.</li>
+</ol>
+<h3 id="reglas--6-venta-y-caja">6. Venta y caja</h3>
+<p><strong>POS.</strong> Preparar carrito y cotización del total sin reservar stock. Al confirmar: autorizar descuento y turno presente, validar catálogo y precios actuales (si cambiaron, pedir revisar), verificar disponibilidad, grabar venta/detalles/cuenta/pagos, descontar stock y auditar, todo en una transacción. POS V1 exige total positivo totalmente cubierto. Si hay efectivo, el monto recibido debe cubrir la porción asignada a efectivo; <code>cambio = recibido − efectivo_aplicado</code>, y caja suma solo efectivo aplicado. Para anular una venta completa, exigir administrador, motivo, turno válido y devolución física de lo vendido cuando corresponda. Generar contramovimientos por las posiciones originales y revertir cada pago en su medio, una vez, en el turno de devolución. Conservar venta y turno originales. No se altera el arqueo de un turno ya cerrado.</p>
+<p><strong>Caja.</strong> Abrir con saldo no negativo; ingresos/retiros manuales son efectivo, requieren motivo y no pueden usarse como sustituto de un cobro. Cada turno tiene un responsable. El arqueo parcial no cierra: guarda un corte trazable. El cierre exige monto contado y observación si hay diferencia; no se reabre ni se permiten nuevas imputaciones. No autorizar un retiro o devolución que exceda el efectivo esperado del turno con el criterio de esta V1. Los pagos electrónicos se muestran por medio y no cambian el efectivo esperado.</p>
+<p><strong>Efectivo esperado = saldo inicial + cobros efectivos + ingresos manuales − retiros − devoluciones efectivas.</strong> La apertura no es un movimiento manual; el pago no se copia como ingreso. <code>diferencia = contado − esperado</code>. Si un total de $32.130 se paga con $20.000 por transferencia y $15.000 en billetes, se aplican $12.130 en efectivo y el cambio es $2.870. Ejemplo de turno con esos cobros: apertura $50.000, ingresos manuales $8.000, retiros $5.000, otras devoluciones en efectivo por $2.000; esperado $63.130. Con $63.000 contados, diferencia −$130. Transferencia queda por separado.</p>
+<p><strong>Fiscal.</strong> Imprimir solo documentos internos rotulados como tales. Definir un puerto <code>FiscalIssuer</code> para solicitar emisión y consultar resultado con un proveedor autorizado cuando se disponga de requisitos/credenciales. Una futura integración se despacha después del commit, con referencia única y estado externo verificable. En V1 no se generan folios fiscales ficticios ni se marca «emitido» por haber impreso el recibo interno.</p>
+<h3 id="reglas--7-atomicidad-concurrencia-y-reintentos">7. Atomicidad, concurrencia y reintentos</h3>
+<ul>
+<li>Una conexión PDO por unidad de trabajo: <code>READ COMMITTED</code> en los comandos y <code>SELECT … FOR UPDATE</code> por PK/clave única. No es suficiente leer disponible en un carrito, sumar pagos fuera de la transacción o confiar en el bloqueo de una sesión PHP.</li>
+<li><strong>Orden de bloqueo común:</strong> clave de idempotencia → raíz del documento y sus hijos editables → caja y turno (si aplica) → cuenta y pagos de origen → catálogo y posiciones ordenadas por <code>(product_id,location_id)</code> → reservas/movimientos de origen → eventos y auditoría. Bloquear cada grupo por clave ascendente; si se necesita descubrir IDs, leer primero y revalidar tras tomar los bloqueos. Los demás casos (p. ej. ajuste o cierre) toman solo el subconjunto que usan, en ese mismo orden.</li>
+<li>Apertura, cobros, retiros, devoluciones y cierre coordinan sobre las mismas filas de caja/turno. Al cerrar, releer los totales bajo ese bloqueo y guardar foto del corte en la misma transacción. Un cobro concurrente entra completo antes del corte o se rechaza como turno cerrado; no migra silenciosamente al turno siguiente. Al reservar y vender se compite por la misma posición. En la última unidad, un solo comando puede conseguirla.</li>
+<li>Los comandos críticos reciben <code>Idempotency-Key</code>. La clave es por usuario/comando y la huella cubre método, destino y solicitud normalizada. Una clave repetida con igual huella recupera el resultado confirmado, después de autenticar/autorizar, sin volver a calcular stock, turno ni saldo. Una clave igual con otra solicitud da conflicto. La marca de éxito coincide con el commit de los efectos; un rollback no deja un éxito aparente. No caducar claves financieras de manera que un reintento antiguo pueda repetir el cobro. Usar reintentos acotados de transacción ante deadlock y devolver error recuperable si persiste; conservar la misma clave al reintentar el mismo comando.</li>
+</ul>
+<h3 id="reglas--8-indicadores-agenda-y-auditoria">8. Indicadores, agenda y auditoría</h3>
+<div aria-label="Tabla: 8. Indicadores, agenda y auditoría" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Indicador</th>
+<th scope="col">Definición y período</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Órdenes abiertas / en reparación</td>
+<td>Abiertas: confirmadas no terminales, excluye borradores. En reparación: exactamente <code>en_reparacion</code>. Fecha de corte actual.</td>
+</tr>
+<tr>
+<td>Ventas del día</td>
+<td>Cantidad y total bruto de ventas POS confirmadas hoy y aún vigentes. Anulaciones ocurridas hoy se muestran separadas por fecha de anulación. No son cobros de órdenes ni efectivo del turno.</td>
+</tr>
+<tr>
+<td>Stock crítico</td>
+<td>Productos activos con disponible agregado en ubicaciones operativas <code>≤ mínimo</code>; separar agotados (<code>= 0</code>), bajo mínimo y en el umbral.</td>
+</tr>
+<tr>
+<td>Cobros pendientes</td>
+<td>Suma de saldos firmes positivos de cuentas vigentes. Mostrar anticipos provisionales y montos a favor por separado.</td>
+</tr>
+<tr>
+<td>Agenda del día</td>
+<td>Recepciones, entregas y llamadas entre inicio del día local e inicio del siguiente; cliente, orden opcional, responsable, hora y estado.</td>
+</tr>
+<tr>
+<td>Alertas y actividad</td>
+<td>Presupuestos enviados sin decisión, próximos a vencer o vencidos según fecha real; entrega estimada en próximas 24 h o vencida en órdenes no terminales; toda actividad con alcance, sin secretos.</td>
+</tr>
+</tbody>
+</table></div>
+<p>El tablero indica período y zona; usa límites locales <code>America/Santiago</code> convertidos a UTC, incluso en cambios de horario. Órdenes recientes se ordenan por ingreso más ID. No publica % comparativos sin período y base suficientes. Cada evento sensible identifica actor, fecha, entidad y cambio concreto; guarda motivo en anulaciones, reembolsos y ajustes, y no copia formularios completos.</p>
+</div>
+<a class="to-top" href="#inicio">↑ Volver al índice</a>
+</article>
+<article class="chapter" id="api" aria-labelledby="api-title">
+<div class="chapter-head"><span class="unit" aria-hidden="true">04</span><div><div class="chapter-kicker">CAPÍTULO 04 / 06</div><h2 id="api-title">API REST</h2><p>Contrato inicial de /api/v1: recursos, permisos, errores y efectos.</p></div></div>
+<nav class="subindex" aria-label="En este capítulo"><a href="#api--1-convenciones-http">Convenciones HTTP</a><a href="#api--2-identidad-clientes-y-equipos">Identidad, clientes y equipos</a><a href="#api--3-ordenes-y-evidencia">Órdenes y evidencia</a><a href="#api--4-inventario-y-catalogo">Inventario y catálogo</a><a href="#api--5-armados-y-presupuestos">Armados y presupuestos</a><a href="#api--6-pos-pagos-y-caja">POS, pagos y caja</a><a href="#api--7-dashboard-agenda-y-administracion">Dashboard, agenda y administración</a></nav>
+<div class="prose">
+<h3 id="api--1-convenciones-http">1. Convenciones HTTP</h3>
+<p>Base <code>/api/v1</code>. Las rutas de las tablas son relativas a esa base. JSON en UTF-8 y cookies de sesión del mismo origen. <code>fetch</code> incluye <code>credentials: 'same-origin'</code> y <code>X-CSRF-Token</code> en mutaciones. Todas las rutas requieren sesión excepto <code>GET /auth/csrf</code> y <code>POST /auth/login</code>; este último todavía exige CSRF. Autorización por permiso, entidad y campos según la <a href="#arquitectura--5-matriz-de-roles-y-permisos">matriz de roles</a>. Los cuerpos mencionados son el contrato inicial, no endpoints desplegados.</p>
+<ul>
+<li><code>GET</code> no cambia estado de negocio. Cuerpos JSON salvo subidas <code>multipart/form-data</code>. Las descargas de CSV y archivos privados son las únicas respuestas de recurso no JSON; ante fallo, el error sigue siendo JSON. Los comprobantes internos devuelven datos autorizados para imprimir una vista HTML estática.</li>
+<li>ID y dinero se representan como cadenas. Importes no admiten símbolos, separadores de miles ni exponente; se valida escala de moneda. Las cantidades y parámetros de paginación son enteros acotados. Timestamps en RFC 3339 con offset explícito; los rangos son <code>[from,to)</code>.</li>
+<li>Listas: <code>page=1</code>, <code>per_page=25</code> por defecto, máximo 100; <code>sort</code> con campos permitidos y desempate estable por ID. <code>q</code> acotado; rangos se traducen a UTC. <code>meta</code> de listas contiene <code>page</code>, <code>per_page</code>, <code>total</code> y <code>total_pages</code> con el mismo alcance; demás respuestas pueden usar <code>meta: null</code>. Las exportaciones usan filtros equivalentes, límites y neutralización de celdas interpretables como fórmulas.</li>
+<li><strong><code>K</code></strong> en tablas = encabezado <code>Idempotency-Key</code> obligatorio. Se recomienda una clave aleatoria por intención; persistir la misma en reintentos de la misma solicitud. Autorizar antes de replay; ventana de reintentos duradera en comandos financieros. Un replay devuelve la respuesta mínima original y <code>Idempotency-Replayed: true</code> sin repetir efectos, aun cuando el turno original haya cerrado.</li>
+<li><strong><code>V</code></strong> = <code>If-Match</code> obligatorio con ETag de la versión recuperada, por ejemplo <code>"order-482-v3"</code>. En comandos K se verifica replay antes de reevaluar precondiciones del negocio. Una diferencia de versión impide sobrescribir trabajo de otra persona. El servidor no acepta campos desconocidos en cuerpos de mutación.</li>
+<li><code>X-Request-Id</code> identifica la solicitud para soporte. Los errores exponen códigos estables, no SQL, rutas internas ni secretos. El cliente conserva el formulario no secreto ante un 422; tras 401 vuelve a login; ante 409 o 412 ofrece refrescar/revisar, no reenvía con una clave nueva automáticamente.</li>
+</ul>
+<pre><code class="language-json">{
+  "data": [{"id":"482","number":"OT-000482","state":"diagnostico"}],
+  "message": null,
+  "errors": [],
+  "meta": {"page":1,"per_page":25,"total":1,"total_pages":1}
+}
+</code></pre>
+<pre><code class="language-json">{
+  "data": null,
+  "message": "No hay disponibilidad para la cantidad solicitada.",
+  "errors": [{"field":"items[0].quantity","code":"insufficient_stock","detail":"Revisá la cantidad o la ubicación."}],
+  "meta": null
+}
+</code></pre>
+<div aria-label="Tabla: 1. Convenciones HTTP" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">HTTP</th>
+<th scope="col">Uso previsto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>200</code>, <code>201</code></td>
+<td>Lectura/comando correcto; creación con <code>Location</code> cuando hay recurso. <code>200</code> sin turno devuelve <code>data: null</code>.</td>
+</tr>
+<tr>
+<td><code>400</code>, <code>413</code>, <code>415</code></td>
+<td>JSON ilegible, cuerpo demasiado grande, tipo de contenido no soportado.</td>
+</tr>
+<tr>
+<td><code>401</code>, <code>403</code>, <code>404</code></td>
+<td>Sin sesión o vencida; permiso/CSRF inválido; inexistente o fuera de alcance para no filtrar existencia.</td>
+</tr>
+<tr>
+<td><code>409</code></td>
+<td>Stock insuficiente, turno cerrado, estado incompatible, duplicado exacto, precio cambiado o clave idempotente reutilizada con otro contenido.</td>
+</tr>
+<tr>
+<td><code>412</code>, <code>428</code></td>
+<td>ETag desactualizado o ausente en una operación que lo exige.</td>
+</tr>
+<tr>
+<td><code>422</code></td>
+<td>Validación de campos, importes, RUT, firma o archivo inválido; incluye detalle por campo/fila.</td>
+</tr>
+<tr>
+<td><code>429</code>, <code>500</code>, <code>503</code></td>
+<td>Límite temporal (con <code>Retry-After</code>); fallo inesperado; comando temporalmente ocupado tras reintentos acotados (reintentar con la misma clave).</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="api--2-identidad-clientes-y-equipos">2. Identidad, clientes y equipos</h3>
+<div aria-label="Tabla: 2. Identidad, clientes y equipos" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Método y ruta</th>
+<th scope="col">Solicitud y respuesta <code>data</code></th>
+<th scope="col">Permiso y efectos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /auth/csrf</code></td>
+<td>Devuelve <code>{csrf_token}</code> de la sesión anónima o activa; <code>no-store</code>.</td>
+<td>Público; sin efecto de negocio.</td>
+</tr>
+<tr>
+<td><code>POST /auth/login</code></td>
+<td><code>{login,password}</code> → identidad, roles, permisos, nuevo token CSRF y turno visible o <code>null</code>.</td>
+<td>CSRF anónimo, límite de intentos, sesión regenerada; <code>401</code> genérico.</td>
+</tr>
+<tr>
+<td><code>POST /auth/logout</code> · <code>GET /auth/me</code></td>
+<td>Cerrar e invalidar sesión → confirmación. Leer → identidad, permisos, token y turno activo visible.</td>
+<td>Usuario activo. Logout no cierra caja; un turno es distinto a una sesión web.</td>
+</tr>
+<tr>
+<td><code>GET /customers</code> · <code>POST /customers</code></td>
+<td><code>q</code>, paginación → clientes y señales de coincidencia. Alta con nombre, tipo/emisor/documento, teléfono, email, dirección/comuna y observaciones.</td>
+<td><code>customers.read/write</code>; documento exacto repetido → <code>409</code>, RUT inválido → <code>422</code>. Sin pagos/stock.</td>
+</tr>
+<tr>
+<td><code>GET /customers/{id}</code> · <code>PATCH /customers/{id}</code> <strong>V</strong></td>
+<td>Perfil y vínculos paginados por separado (<code>GET /customers/{id}/{devices,service-orders,quotes,sales,receivables}</code>); cambios permitidos → perfil.</td>
+<td>Permiso de clientes más permiso del módulo relacionado; aplicar alcance a cada colección.</td>
+</tr>
+<tr>
+<td><code>GET /devices</code> · <code>GET /devices/{id}</code> · <code>POST /devices</code> · <code>PATCH /devices/{id}</code> <strong>V</strong></td>
+<td><code>customer_id</code>, <code>q</code>; crear/editar tipo, marca, modelo, serie, SO y observaciones. Devuelve equipo.</td>
+<td><code>devices.read/write</code>; sin reasignar propietario desde la API inicial.</td>
+</tr>
+<tr>
+<td><code>GET /technicians</code></td>
+<td>Lista mínima de técnicos habilitados (ID y nombre); <code>q</code>, paginación.</td>
+<td><code>orders.assign</code> o <code>projects.manage</code>; no expone datos administrativos.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="api--3-ordenes-y-evidencia">3. Órdenes y evidencia</h3>
+<div aria-label="Tabla: 3. Órdenes y evidencia" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Método y ruta</th>
+<th scope="col">Solicitud y respuesta <code>data</code></th>
+<th scope="col">Permiso, conflicto o efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /service-orders</code> · <code>GET /service-orders/export</code></td>
+<td><code>q</code> (número, cliente, equipo o serie), <code>state</code>, <code>priority</code>, <code>technician_id</code>, <code>from</code>, <code>to</code>; lista paginada o CSV.</td>
+<td><code>orders.read</code> / <code>orders.export</code>; borradores propios o admin y alcance por asignación.</td>
+</tr>
+<tr>
+<td><code>POST /service-orders</code> <strong>K</strong> · <code>PATCH /service-orders/{id}</code> <strong>V</strong></td>
+<td>Crea borrador con campos parciales; edita campos permitidos por fase (<code>customer_id</code>, <code>device_id</code>, falla, recepción, <code>items</code>, prioridad, técnico, estimación, fecha, etc.). Devuelve ID/versión y ETag.</td>
+<td><code>orders.receive</code> o permiso específico del campo tras confirmar (<code>orders.assign</code>, <code>orders.tech</code>); nunca se escribe saldo, estado ni contraseña por PATCH. Borrador no toca stock ni caja.</td>
+</tr>
+<tr>
+<td><code>DELETE /service-orders/{id}</code> <strong>V</strong></td>
+<td>Descarta un borrador propio o administrado; responde con estado del descarte.</td>
+<td><code>orders.receive</code> más alcance; no descarta una OT confirmada. Los archivos de borrador se limpian según política.</td>
+</tr>
+<tr>
+<td><code>GET /service-orders/{id}</code> · <code>GET /service-orders/{id}/receipt</code></td>
+<td>Detalle con estado, tareas/notas, accesorios/archivos y resumen histórico según permiso; comprobante desde instantánea de ingreso.</td>
+<td><code>orders.read</code> y proyección de rol. Técnicos no reciben pagos ni costos; nunca devuelve el secreto por estas rutas.</td>
+</tr>
+<tr>
+<td><code>POST /service-orders/{id}/confirm</code> <strong>K V</strong></td>
+<td><code>consents[]</code> con tipo, decisión y versión cuando aplique; <code>signature_file_id</code> si se exige; <code>advance</code> opcional con <code>cash_session_id</code> y <code>payments[]</code>; <code>temporary_access</code> opcional. Devuelve OT, estado, cuenta y comprobante.</td>
+<td><code>orders.receive</code> y permisos de cobro/acceso si se usan. <code>409</code> por turno/estado; <code>422</code> por conformidad incompleta. Si hay anticipo, se imputa en el mismo commit. Sin movimiento de stock.</td>
+</tr>
+<tr>
+<td><code>POST /service-orders/{id}/transitions</code> <strong>K</strong></td>
+<td><code>{to,reason,delivery_evidence?}</code> → estado y evento. Recepción y envío de presupuesto se manejan con sus comandos específicos.</td>
+<td><code>orders.tech</code> / <code>orders.receive</code> / <code>orders.deliver</code> / <code>orders.cancel</code> según transición. Cancelación libera reservas, no devuelve dinero ni consumo automáticamente.</td>
+</tr>
+<tr>
+<td><code>POST /service-orders/{id}/tasks</code> · <code>PATCH /service-orders/{id}/tasks/{task_id}</code> <strong>V</strong> · <code>POST /service-orders/{id}/notes</code></td>
+<td>Crear/editar tarea con responsable, estado, progreso y prueba; nota <code>{text}</code> → elemento con autor/fecha.</td>
+<td><code>orders.tech</code> asignado en tareas; <code>orders.tech</code> u <code>orders.receive</code> según nota y alcance. No genera movimientos.</td>
+</tr>
+<tr>
+<td><code>POST /service-orders/{id}/photos</code> · <code>GET /service-orders/{id}/photos/{photo_id}/content</code></td>
+<td>Cargar <code>file</code> y fase/descripción → metadatos; descargar contenido autorizado.</td>
+<td><code>orders.receive</code> (ingreso) o <code>orders.tech</code> asignado (pruebas); lectura con <code>orders.read</code> y alcance. <code>413</code>/<code>422</code> según el archivo.</td>
+</tr>
+<tr>
+<td><code>POST /service-orders/{id}/signatures</code> · <code>GET /service-orders/{id}/signatures/{file_id}/content</code></td>
+<td>Subir firma PNG privada → <code>file_id</code> para usar en confirmación; descargar por finalidad.</td>
+<td>Escritura y lectura ordinaria solo para <code>orders.receive</code> con alcance; admin incluido. Solo firma de la misma orden.</td>
+</tr>
+<tr>
+<td><code>PUT /service-orders/{id}/temporary-access</code> · <code>POST /service-orders/{id}/temporary-access/reveal</code> · <code>DELETE /service-orders/{id}/temporary-access</code></td>
+<td>Establecer <code>{secret}</code> o retirar → confirmación sin valor; revelar con <code>{reauth_password,reason}</code> → valor puntual con <code>Cache-Control: no-store</code>.</td>
+<td><code>orders.access.write</code> / <code>orders.access.reveal</code> más alcance, sesión válida y reautenticación en revelado. Solo órdenes confirmadas no terminales. No guardar campos sensibles en auditoría ni respuestas reutilizables.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="api--4-inventario-y-catalogo">4. Inventario y catálogo</h3>
+<div aria-label="Tabla: 4. Inventario y catálogo" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Método y ruta</th>
+<th scope="col">Solicitud y respuesta <code>data</code></th>
+<th scope="col">Permiso y efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /products</code> · <code>GET /products/{id}</code> · <code>POST /products</code> · <code>PATCH /products/{id}</code> <strong>V</strong></td>
+<td><code>q</code>, <code>category_id</code>, <code>location_id</code>, <code>active</code>, <code>stock_alert</code>; ficha, disponibilidad y catálogo. Escritura con SKU, referencias, precios, mínimo y estado.</td>
+<td><code>catalog.read</code> / <code>catalog.manage</code>, <code>costs.read</code> para costos; no acepta cantidad física.</td>
+</tr>
+<tr>
+<td><code>GET /{categories,suppliers,locations,service-catalog}</code> · <code>POST</code> en la colección · <code>PATCH …/{id}</code> <strong>V</strong></td>
+<td>Lectura y mantenimiento por código/nombre; en catálogo de servicios, precio/impuesto y activo. Especificaciones por producto en <code>GET/PUT /products/{id}/technical-specs</code> (<strong>V</strong> en PUT).</td>
+<td>Lectura de catálogo según proyección; edición <code>catalog.manage</code>.</td>
+</tr>
+<tr>
+<td><code>GET /inventory/alerts</code> · <code>GET /stock-movements</code> · <code>POST /stock-movements</code> <strong>K</strong></td>
+<td>Alertas/historial por producto/ubicación/tipo/fechas. Escribir <code>{type,product_id,location_id,quantity,reason,returned_from_id?}</code> → movimiento y posición.</td>
+<td><code>stock.read</code> / <code>stock.adjust</code>. API directa solo admite entrada, ajuste y devolución autorizada de taller; venta/consumo/reversión por comandos propios.</td>
+</tr>
+<tr>
+<td><code>GET /stock-reservations</code> · <code>POST /stock-reservations</code> <strong>K</strong></td>
+<td>Filtros por orden, proyecto, producto y estado. Crear con un ítem tipado, ubicación y cantidad → reserva.</td>
+<td><code>stock.read</code> según alcance / <code>stock.reserve</code>; aumenta reservado, no físico. <code>409</code> si falta disponibilidad.</td>
+</tr>
+<tr>
+<td><code>POST /stock-reservations/{id}/release</code> · <code>POST /stock-reservations/{id}/consume</code> <strong>K en ambos</strong></td>
+<td><code>{quantity,reason}</code> → evento, reserva y posición actualizadas.</td>
+<td><code>stock.reserve</code> / <code>stock.consume</code> y alcance asignado. Liberar no toca físico; consumir descuenta físico y reservado.</td>
+</tr>
+<tr>
+<td><code>GET /products/export</code> · <code>POST /products/imports/preview</code> · <code>POST /products/imports/{id}/commit</code> <strong>K en commit</strong></td>
+<td>CSV con filtros y columnas autorizadas. Preview recibe archivo → lote, filas válidas/errores; commit revalida y devuelve reporte final.</td>
+<td><code>catalog.read</code> / <code>stock.import</code>; no incorpora existencias sin movimiento.</td>
+</tr>
+<tr>
+<td><code>GET /purchase-requests</code> · <code>POST /purchase-requests</code> <strong>K</strong> · <code>PATCH /purchase-requests/{id}</code> <strong>V</strong></td>
+<td>Líneas <code>{product_id,quantity}</code> con motivo → solicitud; gestión de estado.</td>
+<td><code>purchase.request</code> lectura propia/alta, <code>purchase.manage</code> gestión; sin correo a proveedores ni cambio de stock.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="api--5-armados-y-presupuestos">5. Armados y presupuestos</h3>
+<div aria-label="Tabla: 5. Armados y presupuestos" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Método y ruta</th>
+<th scope="col">Solicitud y respuesta <code>data</code></th>
+<th scope="col">Permiso y efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /pc-projects</code> · <code>GET /pc-projects/{id}</code> · <code>POST /pc-projects</code> <strong>K</strong> · <code>PATCH /pc-projects/{id}</code> <strong>V</strong></td>
+<td>Filtros por cliente/estado/técnico/fecha. Alta/edición de tipo, equipo base, uso, técnico e ítems. Devuelve proyecto y versión.</td>
+<td><code>projects.read/manage</code>, o <code>projects.tech</code> para campos técnicos autorizados en recurso asignado; no copia costos a técnicos ni crea pagos.</td>
+</tr>
+<tr>
+<td><code>GET /pc-projects/{id}/compatibility</code> · <code>POST /pc-projects/{id}/updates</code></td>
+<td>Evaluación por regla y evidencia; agregar nota, prueba o avance.</td>
+<td><code>projects.read</code> / <code>projects.tech</code> asignado; sin movimiento automático.</td>
+</tr>
+<tr>
+<td><code>POST /pc-projects/{id}/{transitions,duplicate,archive}</code> <strong>K cada ruta</strong></td>
+<td>Estado y motivo, nueva solicitud duplicada, o registro de archivo.</td>
+<td><code>projects.tech/manage/deliver/cancel</code> según acción. Duplicar no transfiere compromisos; cancelar libera reservas; entregar exige liquidación.</td>
+</tr>
+<tr>
+<td><code>GET /quotes</code> · <code>GET /quotes/{id}</code> · <code>POST /quotes</code> <strong>K</strong> · <code>PATCH /quotes/{id}</code> <strong>V</strong></td>
+<td>Filtros por destino/estado/vencimiento. Alta con un destino, líneas catalogadas, vigencia, descuento autorizado → revisión.</td>
+<td><code>quotes.read/manage</code>; costos con <code>costs.read</code>, descuento con <code>pricing.discount</code>. Solo el borrador se edita. No genera saldo por crear.</td>
+</tr>
+<tr>
+<td><code>POST /quotes/{id}/send</code> <strong>K</strong> · <code>GET /quotes/{id}/print-data</code></td>
+<td>Registra envío manual real <code>{channel,occurred_at,reference}</code>; datos de impresión sin costos desde revisión emitida.</td>
+<td><code>quotes.manage</code> / <code>quotes.read</code>; no ejecuta envío externo. Actualiza estado del destino cuando corresponde.</td>
+</tr>
+<tr>
+<td><code>POST /quotes/{id}/approvals</code> <strong>K</strong></td>
+<td><code>{decision,channel,occurred_at,reference}</code> → decisión y cuenta/resumen si se aprueba.</td>
+<td><code>quotes.approve</code>; <code>409</code> si venció, se desplazó o no cumple guardas. Aprobación fija base firme; no cobra ni consume stock.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="api--6-pos-pagos-y-caja">6. POS, pagos y caja</h3>
+<div aria-label="Tabla: 6. POS, pagos y caja" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Método y ruta</th>
+<th scope="col">Solicitud y respuesta <code>data</code></th>
+<th scope="col">Permiso y efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /sales</code> · <code>GET /sales/{id}</code> · <code>GET /sales/{id}/receipt</code></td>
+<td>Historial <code>from</code>, <code>to</code>, <code>customer_id</code>, <code>state</code>; detalle y datos imprimibles.</td>
+<td><code>sales.read</code>; sin datos de medio sensibles.</td>
+</tr>
+<tr>
+<td><code>POST /sales/preview</code></td>
+<td>Ítems producto/servicio, cantidad, ubicación y descuento opcional → desglose, <code>pricing_fingerprint</code> y disponibilidad indicativa.</td>
+<td><code>sales.create</code>; <code>pricing.discount</code> si solicita descuento. No reserva, cobra ni fija un precio definitivo.</td>
+</tr>
+<tr>
+<td><code>POST /sales</code> <strong>K</strong></td>
+<td>Carrito, <code>pricing_fingerprint</code>, <code>expected_total</code>, turno explícito, cliente o <code>null</code>, <code>payments[]</code> → venta, total y cambio.</td>
+<td><code>sales.create</code>, <code>payments.post</code>, turno válido y descuento autorizado. Revalida huella y disponibilidad; graba venta, pagos y salida juntos.</td>
+</tr>
+<tr>
+<td><code>POST /sales/{id}/void</code> <strong>K</strong></td>
+<td><code>{cash_session_id,reason,refund_references?,return_confirmed}</code> → venta anulada y reversión.</td>
+<td><code>sales.void</code>, <code>payments.refund</code>; devuelve stock vendido y compensa cobros en turno vigente. No reabre el antiguo.</td>
+</tr>
+<tr>
+<td><code>GET /receivables</code> · <code>GET /receivables/{id}</code></td>
+<td>Búsqueda por cliente/número y filtro de saldo; base vigente, neto, pendiente/a favor, medios.</td>
+<td><code>payments.post</code> o <code>reports.read</code> más alcance del documento; solo roles con proyección financiera.</td>
+</tr>
+<tr>
+<td><code>POST /payments</code> <strong>K</strong></td>
+<td><code>{receivable_id,cash_session_id,payments:[…]}</code> → pagos y saldo. Efectivo <code>{method:"cash",amount,tendered}</code>; débito/transferencia <code>{method,amount,reference}</code>.</td>
+<td><code>payments.post</code>; solo cuenta de orden o armado vigente no terminal. POS y anticipo de recepción usan sus propios comandos compuestos. No duplica venta.</td>
+</tr>
+<tr>
+<td><code>POST /payments/{id}/refunds</code> <strong>K</strong></td>
+<td><code>{cash_session_id,amount,reason,reference?}</code> → devolución imputada a la cuenta original.</td>
+<td><code>payments.refund</code>; solo pagos de servicio/armado no terminal, para POS usar anulación. Valida remanente, turno y medio.</td>
+</tr>
+<tr>
+<td><code>GET /cash-registers</code> · <code>GET /cash-sessions/current</code> · <code>GET /cash-sessions</code> · <code>GET /cash-sessions/{id}</code></td>
+<td>Cajas habilitadas, turno propio, historial por caja/fechas, detalle por medio y arqueos.</td>
+<td><code>cash.read</code> con alcance; <code>current</code> no cambia turno.</td>
+</tr>
+<tr>
+<td><code>POST /cash-registers</code> · <code>PATCH /cash-registers/{id}</code> <strong>V</strong></td>
+<td>Código, nombre y estado → caja.</td>
+<td><code>settings.manage</code>; no deshabilitar con un turno abierto.</td>
+</tr>
+<tr>
+<td><code>POST /cash-sessions</code> <strong>K</strong></td>
+<td><code>{register_id,opening_amount}</code> → nuevo turno.</td>
+<td><code>cash.operate</code>; evita duplicar turno por caja o responsable. Apertura no crea pago.</td>
+</tr>
+<tr>
+<td><code>POST /cash-sessions/{id}/movements</code> <strong>K</strong></td>
+<td><code>{direction,amount,reason}</code> → movimiento manual y resumen.</td>
+<td><code>cash.operate</code> y turno propio o <code>cash.override</code> con motivo. Solo efectivo, no imputable a ventas.</td>
+</tr>
+<tr>
+<td><code>POST /cash-sessions/{id}/counts</code> · <code>POST /cash-sessions/{id}/close</code> <strong>K en ambos</strong></td>
+<td><code>{counted_amount,observations?}</code> → esperado, contado, diferencia, totales por método y hora de corte; close finaliza.</td>
+<td><code>cash.operate</code> con alcance (override explícito si aplica). Exige observación si hay diferencia de cierre. No admite nuevos cobros tras cerrar.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Ejemplo de confirmación POS: el <code>pricing_fingerprint</code> se toma de la previsualización del mismo carrito; si cambia el catálogo o la política relevante, no se confirma hasta revisarlo. Si un administrador actúa en un turno ajeno, el comando declara ese <code>cash_session_id</code> (o ruta de turno) y <code>override_reason</code> de forma explícita. Métodos: <code>cash</code>, <code>debit</code>, <code>transfer</code>. Un medio a lo sumo una vez por comando. Se exige referencia no sensible de débito/transferencia, sin número de tarjeta ni datos de cuenta.</p>
+<pre><code class="language-http">POST /api/v1/sales
+Content-Type: application/json
+X-CSRF-Token: &lt;token-de-sesion&gt;
+Idempotency-Key: &lt;clave-de-esta-confirmacion&gt;
+</code></pre>
+<pre><code class="language-json">{
+  "cash_session_id":"14",
+  "customer_id":null,
+  "items":[
+    {"product_id":"53","location_id":"2","quantity":1},
+    {"service_id":"9","quantity":1}
+  ],
+  "discount":{"amount":"3570","reason":"Descuento autorizado"},
+  "pricing_fingerprint":"&lt;huella-del-preview&gt;",
+  "expected_total":"32130",
+  "payments":[
+    {"method":"transfer","amount":"20000","reference":"REF-DEMO-14"},
+    {"method":"cash","amount":"12130","tendered":"15000"}
+  ]
+}
+</code></pre>
+<pre><code class="language-json">{
+  "data":{"id":"721","number":"VTA-000721","currency":"CLP","subtotal_net":"27000","tax":"5130","total":"32130","cash_change":"2870","state":"confirmed"},
+  "message":"Venta confirmada.",
+  "errors":[],
+  "meta":null
+}
+</code></pre>
+<h3 id="api--7-dashboard-agenda-y-administracion">7. Dashboard, agenda y administración</h3>
+<div aria-label="Tabla: 7. Dashboard, agenda y administración" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Método y ruta</th>
+<th scope="col">Solicitud y respuesta <code>data</code></th>
+<th scope="col">Permiso y efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /dashboard</code></td>
+<td>Zona y período del día, indicadores, agenda, órdenes recientes y alertas permitidas.</td>
+<td><code>dashboard.read</code>; restringe alcance y datos por rol.</td>
+</tr>
+<tr>
+<td><code>GET /appointments</code> · <code>POST /appointments</code> <strong>K</strong> · <code>PATCH /appointments/{id}</code> <strong>V</strong></td>
+<td>Filtros <code>from</code>, <code>to</code>, <code>kind</code>, <code>status</code>, cliente/orden. Alta/edición con hora, tipo, cliente, orden opcional, responsable, estado.</td>
+<td><code>agenda.read/write</code>, FK y alcance según cliente/orden. Sin envío de recordatorios.</td>
+</tr>
+<tr>
+<td><code>GET /audit-logs</code> · <code>GET /reports/{sales,stock,cash,receivables}</code></td>
+<td>Historial o agregados por fecha, actor/entidad y filtros válidos por reporte.</td>
+<td><code>audit.read</code> / <code>reports.read</code>; no hay API de borrado de auditoría.</td>
+</tr>
+<tr>
+<td><code>GET/POST /users</code> · <code>PATCH /users/{id}</code> <strong>V</strong> · <code>PUT /users/{id}/roles</code> <strong>V</strong> · <code>GET/POST /roles</code> · <code>PATCH /roles/{id}</code> <strong>V</strong> · <code>GET /permissions</code> · <code>PUT /roles/{id}/permissions</code> <strong>V</strong></td>
+<td>Alta/desactivación y actualización de acceso; permisos/roles por IDs autorizados.</td>
+<td><code>users.manage</code>; audita modificaciones y no permite dejar sin administrador. Hash y claves nunca en respuestas.</td>
+</tr>
+<tr>
+<td><code>GET /settings</code> · <code>PATCH /settings</code> <strong>V</strong></td>
+<td>Parámetros operativos y versión; cambios con allowlist.</td>
+<td><code>settings.manage</code>. No retorna ni recibe secrets de infraestructura.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Notación con llaves separadas por comas indica rutas distintas, no un valor literal del parámetro. Las rutas fijas (<code>export</code>, <code>current</code>, <code>preview</code>) se resuelven antes de las rutas con ID. Para controles <code>V</code> en recursos secundarios, su lectura de detalle o la representación del recurso padre incluye la versión del elemento a editar. La especificación OpenAPI con esquemas exhaustivos se mantiene junto con los casos implementados en las etapas posteriores; este contrato fija rutas, autoridades, motivos de rechazo y efectos esperados.</p>
+</div>
+<a class="to-top" href="#inicio">↑ Volver al índice</a>
+</article>
+<article class="chapter" id="plan" aria-labelledby="plan-title">
+<div class="chapter-head"><span class="unit" aria-hidden="true">05</span><div><div class="chapter-kicker">CAPÍTULO 05 / 06</div><h2 id="plan-title">Plan de desarrollo y pruebas</h2><p>Etapas completas de extremo a extremo y criterios de aceptación.</p></div></div>
+<nav class="subindex" aria-label="En este capítulo"><a href="#plan--1-etapas-y-salidas-verificables">Etapas y salidas verificables</a><a href="#plan--2-estrategia-para-pruebas">Estrategia para pruebas</a><a href="#plan--3-matriz-de-aceptacion">Matriz de aceptación</a><a href="#plan--4-cierre-de-implementacion-futura">Cierre de implementación futura</a></nav>
+<div class="prose">
+<h3 id="plan--1-etapas-y-salidas-verificables">1. Etapas y salidas verificables</h3>
+<p>Cada etapa entrega interfaz HTML/CSS/JS → API PHP → MySQL para el caso que incorpora. Incluye migraciones aplicables, fixture opt-in, actualización de documentación y pasos reproducibles para verificarla. Una capacidad pendiente se oculta o se indica con claridad; no se sustituye por datos falsos ni resultados simulados.</p>
+<div aria-label="Tabla: 1. Etapas y salidas verificables" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Etapa</th>
+<th scope="col">Entrega vertical</th>
+<th scope="col">Criterio de salida y dependencias</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1 · Base y autenticación</strong></td>
+<td>Raíz estática, enrutamiento <code>/api/v1</code>, PDO, migrador, roles base, login, logout y shell según sesión.</td>
+<td>Instalar desde base vacía; sesión y CSRF verificables; usuario sin permiso rechazado por API. Sin necesidad de pantallas de Figma para la API; sí para cerrar la UI visual.</td>
+</tr>
+<tr>
+<td><strong>2 · Clientes, equipos y órdenes</strong></td>
+<td>CRUD pertinente, deduplicación, asistente en cuatro pasos, reanudación, fotos/consentimientos, orden confirmada sin cobro, comprobante y flujo de taller.</td>
+<td>Recepción sin anticipo funciona de extremo a extremo. Anticipo desactivado hasta Caja; cambios de estado y asignación trazables. Listado, filtros, CSV y detalle.</td>
+</tr>
+<tr>
+<td><strong>3 · Inventario y reservas</strong></td>
+<td>Catálogos, posiciones, entradas/ajustes, reserva/liberación/consumo desde una orden, alertas, CSV con validación y compra interna.</td>
+<td>Reconciliar escenarios físicos y reservados; no hay stock negativo ni importación de cantidades directas. Venta se conecta en etapa 5.</td>
+</tr>
+<tr>
+<td><strong>4 · Presupuestos y armados</strong></td>
+<td>Proyectos, fichas técnicas, validaciones de compatibilidad, versiones/aprobación, impresión, reservas de componentes y pruebas.</td>
+<td>Los datos incompletos no resultan «compatible»; la duplicación crea una solicitud limpia. La cuenta se puede preparar sin simular que se cobró.</td>
+</tr>
+<tr>
+<td><strong>5 · Ventas, pagos y caja</strong></td>
+<td>POS, cobro de servicio/proyecto, anticipos reales al confirmar recepción, anulaciones y arqueos.</td>
+<td>Pruebas de transacciones, anulaciones, reintentos, última unidad y cierre concurrente; cuadrar stock, caja y deudas contra los mayores.</td>
+</tr>
+<tr>
+<td><strong>6 · Dashboard y agenda</strong></td>
+<td>Métricas conectadas, órdenes recientes, alertas, agenda usable y actividad con alcance.</td>
+<td>Fechas y filtros comprobados con fixtures; controles de proyección por rol; sin comparaciones inventadas.</td>
+</tr>
+<tr>
+<td><strong>7 · Reportes y despliegue</strong></td>
+<td>Reportes, revisión de seguridad, ajuste responsive con Figma, prueba de recuperación, operación y guía de instalación/despliegue.</td>
+<td>Verificaciones automatizadas y manuales registradas; recorrido en desktop/tablet/móvil; instalar de cero y restaurar. Emisión fiscal, comunicaciones y pagos electrónicos reportados como pendientes si no están integrados.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Flujo de cambios.</strong> Migraciones append-only con versión/checksum y bloqueo de migrador. Verificar desde base vacía y desde la versión anterior; MySQL puede hacer commit implícito en DDL, por lo que el plan de reversión combina cambios compatibles y copias/restore verificado, no una promesa de rollback DDL global. Un esquema de referencia se regenera a partir de migraciones. No poner credenciales reales en seeds ni en <code>.env.example</code>.</p>
+<h3 id="plan--2-estrategia-para-pruebas">2. Estrategia para pruebas</h3>
+<ul>
+<li><strong>Unitarias:</strong> dinero sin flotantes, asignación de descuentos, validaciones de documentos, compatibilidad faltante, reglas de estados y saldo.</li>
+<li><strong>Integración MySQL real:</strong> migraciones, <code>CHECK</code>, FK, aislamiento, unicidad y bloqueos. No probar concurrencia de inventario solamente con mocks o SQLite. Para carreras, usar conexiones independientes y coordinación reproducible: dos peticiones en paralelo y datos equivalentes, con roles/turnos válidos.</li>
+<li><strong>HTTP y navegador:</strong> login y CSRF, permisos directos a la API, archivos, exportación, recorridos con teclado y varios tamaños. Probar 360, 768 y 1440 px como puntos iniciales, y ajustar a los frames reales de Figma. Contrastar cada métrica del tablero contra consultas de datos autorizadas.</li>
+<li><strong>Fixtures:</strong> escenarios ficticios y deterministas, fecha de referencia parametrizada, email <code>example.test</code>. Cargar movimientos iniciales y reservas coherentes, no repartir saldos al azar. Para caja y descuentos usar un carrito de $11.900 + $23.800 y un descuento de $3.570; debe dar $32.130. Si un fixture registra pagos, debe incluir turno e imputación correctos.</li>
+</ul>
+<h3 id="plan--3-matriz-de-aceptacion">3. Matriz de aceptación</h3>
+<p><strong>Estado de estas pruebas: diseñadas, no ejecutadas.</strong> No hay aplicación ni migraciones implementadas en esta entrega. El resultado de cada caso se registrará con etapa, entorno, datos de entrada y evidencia de ejecución.</p>
+<div aria-label="Tabla: 3. Matriz de aceptación" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">ID</th>
+<th scope="col">Escenario</th>
+<th scope="col">Resultado verificable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T01</td>
+<td>Login por usuario/correo, logout y vencimiento.</td>
+<td>Cookie regenerada, token nuevo, <code>401</code> tras cierre/vencimiento, sin cerrar automáticamente caja.</td>
+</tr>
+<tr>
+<td>T02</td>
+<td>Roles, alcance y CSRF.</td>
+<td>Técnico no modifica caja, no consulta órdenes ajenas ni costos, exportación no evade alcance; mutación sin CSRF falla; permisos revocados surten efecto.</td>
+</tr>
+<tr>
+<td>T03</td>
+<td>Alta de cliente y equipo.</td>
+<td>RUT válido aceptado, inválido rechazado solo como RUT; duplicado controlado; equipo ajeno no puede confirmarse en OT.</td>
+</tr>
+<tr>
+<td>T04</td>
+<td>Guardar y retomar borrador, incluso en otra sesión autorizada.</td>
+<td>Datos no secretos conservados, sin pagos/reservas; edición concurrente obsoleta obtiene <code>412</code>.</td>
+</tr>
+<tr>
+<td>T05</td>
+<td>Confirmación de recepción y comprobante.</td>
+<td>Datos/consentimientos requeridos; una OT y una instantánea; reintento no crea otra.</td>
+</tr>
+<tr>
+<td>T06</td>
+<td>Cambios de estado.</td>
+<td>Solo transiciones permitidas, con actor y fecha; terminales no reabren ni conservan credencial temporal.</td>
+</tr>
+<tr>
+<td>T07</td>
+<td>Reservar, liberar y consumir.</td>
+<td>Desde 5 físicas, reservar 3 deja 2 disponibles; consumir 2 reduce físico/reservado en 2, no disponible de nuevo; un movimiento por consumo.</td>
+</tr>
+<tr>
+<td>T08</td>
+<td>Stock insuficiente y ajuste inválido.</td>
+<td>Cantidades/resultados nunca negativos ni físico por debajo de reservado; rechazo sin filas parciales.</td>
+</tr>
+<tr>
+<td>T09</td>
+<td>Dos ventas simultáneas por la última unidad.</td>
+<td>Dos usuarios/turnos distintos y disponibilidad inicial 1; una venta confirmada, una <code>409</code>; solo una salida y un conjunto de pagos.</td>
+</tr>
+<tr>
+<td>T10</td>
+<td>Anticipo y reintento antes/después de aprobación.</td>
+<td>Anticipo $10.000 sobre cuenta; aprobación $32.130 → $22.130 pendientes, un pago en el turno original, sin duplicación.</td>
+</tr>
+<tr>
+<td>T11</td>
+<td>Presupuestos, revisiones y aprobaciones.</td>
+<td>Emitido inmutable; expirado/desplazado no se aprueba; revisión aprobada sustituye base, no crea otra deuda.</td>
+</tr>
+<tr>
+<td>T12</td>
+<td>Compatibilidad con ficha incompleta y conflicto conocido.</td>
+<td>Falta BIOS → «requiere verificación»; socket distinto → «incompatible»; duplicado sin aprobaciones, pagos ni reservas.</td>
+</tr>
+<tr>
+<td>T13</td>
+<td>Venta con descuento e IVA.</td>
+<td>Descuento prorrateado $1.190/$2.380, neto $27.000, IVA $5.130, total $32.130; descuento no autorizado falla.</td>
+</tr>
+<tr>
+<td>T14</td>
+<td>Cambio y validación de efectivo.</td>
+<td>Transferencia $20.000 + efectivo aplicado $12.130 con $15.000 entregados: cambio $2.870; recibido insuficiente se rechaza.</td>
+</tr>
+<tr>
+<td>T15</td>
+<td>Reintento de venta tras perder la respuesta, también tras cierre.</td>
+<td>Misma clave/cuerpo → misma venta; distinta huella → <code>409</code>; no se duplica stock ni caja.</td>
+</tr>
+<tr>
+<td>T16</td>
+<td>Anular venta completa.</td>
+<td>Venta histórica intacta; una reversión por salida/pago; turno original no cambia si estaba cerrado; reintento no repite.</td>
+</tr>
+<tr>
+<td>T17</td>
+<td>Apertura, arqueo parcial y cierre concurrente con cobro.</td>
+<td>Un turno por caja/responsable; suma cierra de forma consistente; cobro posterior no entra ni se traslada de turno.</td>
+</tr>
+<tr>
+<td>T18</td>
+<td>Caja con medios mixtos y devolución en efectivo.</td>
+<td>Esperado $63.130, contado $63.000 y diferencia −$130 en el fixture; débito/transferencia no elevan efectivo; sin asiento manual espejo.</td>
+</tr>
+<tr>
+<td>T19</td>
+<td>Subida y acceso a archivos.</td>
+<td>MIME falso, SVG o tamaño inválido rechazados; archivo válido privado; otro recurso/rol no lo obtiene conociendo ID.</td>
+</tr>
+<tr>
+<td>T20</td>
+<td>Responsive y accesibilidad.</td>
+<td>Flujos completos en móvil/tablet/escritorio, con teclado, sin tablas cortadas sin alternativa, foco y errores visibles/legibles.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Pruebas adicionales: reservar vs. vender, doble apertura en distintas cajas para el mismo responsable, replay paralelo con misma clave, error forzado a mitad de confirmación con rollback, devolución parcial repetida sobre un pago de servicio, conciliación de importaciones y stock, límites de medianoche y hora de verano, clave temporal expirada, CSV con contenido interpretable como fórmula y restauración de backup.</p>
+<h3 id="plan--4-cierre-de-implementacion-futura">4. Cierre de implementación futura</h3>
+<p>La entrega final incluirá código separado, migraciones/datos de demostración, documentación de API y deployment, <code>.env.example</code> sin secretos, pruebas con resultados reales y lista de integraciones pendientes. Criterios mínimos: <code>ventas/pagos/stock/caja</code> cuadran, los permisos no dependen del frontend y un tercero puede instalar y reproducir los casos desde la documentación. Esta entrega solo aprueba el diseño o permite corregirlo antes de programar.</p>
+</div>
+<a class="to-top" href="#inicio">↑ Volver al índice</a>
+</article>
+<article class="chapter" id="instalacion" aria-labelledby="instalacion-title">
+<div class="chapter-head"><span class="unit" aria-hidden="true">06</span><div><div class="chapter-kicker">CAPÍTULO 06 / 06</div><h2 id="instalacion-title">Instalación prevista</h2><p>Requisitos de entorno, despliegue y operación.</p></div></div>
+<nav class="subindex" aria-label="En este capítulo"><a href="#instalacion--entorno-previsto">Entorno previsto</a><a href="#instalacion--configuracion-a-documentar-al-implementar">Configuración a documentar al implementar</a><a href="#instalacion--secuencia-operativa-prevista">Secuencia operativa prevista</a></nav>
+<div class="prose">
+<p>Este documento define requisitos de operación para la implementación. <strong>Todavía no hay una aplicación, migraciones ni comandos de proyecto para ejecutar.</strong></p>
+<h3 id="instalacion--entorno-previsto">Entorno previsto</h3>
+<div aria-label="Tabla: Entorno previsto" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th scope="col">Componente</th>
+<th scope="col">Requisito de diseño</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web</td>
+<td>Nginx o Apache, TLS en producción. Publicar exclusivamente <code>frontend/</code> y mapear <code>/api/v1/*</code> al front controller; no exponer el árbol completo del proyecto.</td>
+</tr>
+<tr>
+<td>Aplicación</td>
+<td>PHP 8.2+ con sesiones, <code>pdo_mysql</code>, <code>mbstring</code>, <code>bcmath</code>, <code>sodium</code>, <code>fileinfo</code> y decodificación segura de los formatos aprobados (p. ej. GD con JPEG, PNG y WebP). Composer para autoload y dependencias de desarrollo; sin entorno Node de ejecución.</td>
+</tr>
+<tr>
+<td>Datos</td>
+<td>MySQL 8 con InnoDB, <code>utf8mb4</code>, sesión SQL UTC, estricto y claves foráneas. Separar usuario de aplicación, migración y backups.</td>
+</tr>
+<tr>
+<td>Archivos</td>
+<td>Directorios privados de uploads, logs y exports; escritura solo para el proceso autorizado, no permiso de ejecución. HTTPS para sesiones de producción.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="instalacion--configuracion-a-documentar-al-implementar">Configuración a documentar al implementar</h3>
+<ul>
+<li><code>.env.example</code>: nombres, valores de ejemplo inocuos y requerimientos de <code>APP_ENV</code>, <code>APP_ORIGIN</code>, conexión <code>DB_*</code>, almacenamiento privado, límites de sesión/subida, versión y referencia a claves externas. Secretos de MySQL, cifrado y HMAC no van en el frontend ni en el control de versiones. El entorno productivo valida requisitos y falla de forma segura si falta configuración.</li>
+<li>Configuración inicial de negocio: <code>America/Santiago</code>, <code>CLP</code> escala 0, IVA 19 % incluido por defecto, políticas de recepción y catálogo de roles. Configuración operativa en <code>settings</code> según allowlist; no confundir con secretos de infraestructura.</li>
+<li>En desarrollo, mantener mismo origen con configuración del servidor o enrutador solo local. Base de prueba aislada, fixtures ficticios opt-in, administrador inicial creado con comando de bootstrap autenticado o acceso administrativo al host; no habilitar instaladores ni credenciales demo por HTTP en producción.</li>
+</ul>
+<h3 id="instalacion--secuencia-operativa-prevista">Secuencia operativa prevista</h3>
+<ol>
+<li>Crear base y usuarios; configurar variables, directorios y almacenamiento de claves. Aplicar <strong>solo</strong> migraciones a una base vacía; verificar versión y checksum.</li>
+<li>Publicar el frontend y registrar ruta PHP-FPM para API. Probar que <code>.env</code>, <code>backend/storage</code>, logs y archivos de migración no sean accesibles por HTTP.</li>
+<li>Dar de alta administrador, cajas y catálogo inicial; validar el flujo de sesiones y el rango horario local. Cargar fixtures únicamente en un entorno de demo/pruebas.</li>
+<li>Programar limpieza de credenciales expiradas, archivos temporales/lotes y revisión periódica de conciliación. Supervisar errores, rechazos de sesión, espacio y fallos de transacción sin capturar contenidos sensibles.</li>
+<li>Respaldar MySQL y almacenamiento privado de forma coordinada, cifrar copias, versionar claves con acceso separado y probar restauración antes de operar con datos reales. Definir retención y recuperación con el negocio.</li>
+</ol>
+<p>Antes del primer despliegue con datos reales se debe confirmar privacidad, datos de prueba, reglas comerciales y manejo de documentos. La integración fiscal no se activa para simular una emisión; requiere una habilitación independiente.</p>
+</div>
+<a class="to-top" href="#inicio">↑ Volver al índice</a>
+</article>
+</main></div>
+<footer class="site-footer"><div class="shell"><strong>KRONOS TECH</strong><span>Arquitectura · Chile como configuración inicial · Primera entrega</span></div></footer>
+</body></html>

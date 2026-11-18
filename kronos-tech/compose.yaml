@@ -1,0 +1,42 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: kronos
+      MYSQL_USER: kronos_app
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Definí DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Definí DB_ROOT_PASSWORD}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", 'MYSQL_PWD="$$MYSQL_PASSWORD" mysql -h 127.0.0.1 -u "$$MYSQL_USER" kronos -e "SELECT 1 FROM products LIMIT 1"']
+      interval: 3s
+      timeout: 4s
+      retries: 35
+  web:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: development
+      APP_DEMO: "1"
+      APP_KEY: ${APP_KEY:?Definí APP_KEY con openssl rand -base64 32}
+      APP_TIMEZONE: America/Santiago
+      APP_CURRENCY: CLP
+      APP_SCALE: "0"
+      APP_TAX_BPS: "1900"
+      DB_DSN: mysql:host=db;dbname=kronos;charset=utf8mb4
+      DB_USER: kronos_app
+      DB_PASSWORD: ${DB_PASSWORD:?Definí DB_PASSWORD}
+      PHP_CLI_SERVER_WORKERS: "4"
+    ports:
+      - '127.0.0.1:3000:3000'
+    volumes:
+      - files:/app/backend/storage/uploads
+    command: ["sh","-c","php database/seeders/demo.php && exec php -d upload_max_filesize=5M -d post_max_size=6M -S 0.0.0.0:3000 -t frontend backend/bin/serve.php"]
+volumes:
+  mysql_data:
+  files:

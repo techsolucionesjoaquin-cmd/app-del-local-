@@ -1,0 +1,1 @@
+{"name":"kronos-tech/operations","description":"Kronos Tech REST API","require":{"php":">=8.2","ext-pdo":"*","ext-pdo_mysql":"*","ext-bcmath":"*","ext-mbstring":"*","ext-sodium":"*","ext-fileinfo":"*","ext-gd":"*"},"autoload":{"psr-4":{"Kronos\\":"src/"}}}
